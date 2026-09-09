@@ -1,0 +1,422 @@
+[
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e0"
+    },
+    "title": "Slide bài giảng Nhập môn lập trình - Chương 1",
+    "description": "Giới thiệu về lập trình C/C++",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207285-996907.pdf",
+    "filePath": "uploads/seed-1786262207285-996907.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "449"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7c9"
+    },
+    "documentType": "Lecture Notes",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "15"
+    },
+    "viewCount": {
+      "$numberInt": "42"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207285-996907.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e1"
+    },
+    "title": "Đề thi giữa kỳ Cấu trúc dữ liệu 2024",
+    "description": "Đề thi giữa kỳ kèm đáp án chi tiết",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207285-993647.pdf",
+    "filePath": "uploads/seed-1786262207285-993647.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "443"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7ca"
+    },
+    "documentType": "Exam Paper",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "89"
+    },
+    "viewCount": {
+      "$numberInt": "200"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207285-993647.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e2"
+    },
+    "title": "Tổng hợp lý thuyết Cơ sở dữ liệu",
+    "description": "Tóm tắt toàn bộ lý thuyết CSDL: ER, SQL, chuẩn hóa",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207286-455378.pdf",
+    "filePath": "uploads/seed-1786262207286-455378.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "439"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7cb"
+    },
+    "documentType": "Solved Exercises",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "56"
+    },
+    "viewCount": {
+      "$numberInt": "130"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207286-455378.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e3"
+    },
+    "title": "Bài tập OOP Java có lời giải",
+    "description": "Bài tập lập trình hướng đối tượng Java kèm lời giải",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207286-067237.pdf",
+    "filePath": "uploads/seed-1786262207286-067237.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "429"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7cc"
+    },
+    "documentType": "Solved Exercises",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "34"
+    },
+    "viewCount": {
+      "$numberInt": "78"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207286-067237.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e4"
+    },
+    "title": "Đề cương ôn tập Mạng máy tính",
+    "description": "Đề cương chi tiết cho kỳ thi cuối kỳ",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207286-004659.pdf",
+    "filePath": "uploads/seed-1786262207286-004659.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "434"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7cd"
+    },
+    "documentType": "Lecture Notes",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "23"
+    },
+    "viewCount": {
+      "$numberInt": "67"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207286-004659.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e5"
+    },
+    "title": "Báo cáo đồ án Phân tích thiết kế phần mềm",
+    "description": "Báo cáo nhóm 8 - Hệ thống UniShare",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207286-015382.pdf",
+    "filePath": "uploads/seed-1786262207286-015382.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "450"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7ce"
+    },
+    "documentType": "Tutorial",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "12"
+    },
+    "viewCount": {
+      "$numberInt": "35"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207286-015382.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e6"
+    },
+    "title": "Slide Trí tuệ nhân tạo - Machine Learning",
+    "description": "Bài giảng về các thuật toán ML cơ bản",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207286-232744.pdf",
+    "filePath": "uploads/seed-1786262207286-232744.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "440"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7d0"
+    },
+    "documentType": "Lecture Notes",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "45"
+    },
+    "viewCount": {
+      "$numberInt": "112"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207286-232744.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e7"
+    },
+    "title": "Cheat sheet Toán rời rạc",
+    "description": "Tóm tắt công thức tổ hợp, đồ thị, logic",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207286-740737.pdf",
+    "filePath": "uploads/seed-1786262207286-740737.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "422"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7d1"
+    },
+    "documentType": "Lecture Notes",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "67"
+    },
+    "viewCount": {
+      "$numberInt": "155"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207286-740737.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e8"
+    },
+    "title": "Đề thi cuối kỳ Giải tích 1 (5 năm)",
+    "description": "Tổng hợp đề thi Giải tích 1 từ 2019-2024",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207287-059187.pdf",
+    "filePath": "uploads/seed-1786262207287-059187.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "438"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7d2"
+    },
+    "documentType": "Exam Paper",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "120"
+    },
+    "viewCount": {
+      "$numberInt": "310"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207287-059187.png"
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7e9"
+    },
+    "title": "Công thức Xác suất thống kê",
+    "description": "Tổng hợp công thức cần nhớ",
+    "fileUrl": "http://localhost:8000/uploads/seed-1786262207287-098638.pdf",
+    "filePath": "uploads/seed-1786262207287-098638.pdf",
+    "fileType": "application/pdf",
+    "fileSize": {
+      "$numberInt": "429"
+    },
+    "uploader": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "status": "VISIBLE",
+    "subject": {
+      "$oid": "6a7832bf06aef7954aabe7d5"
+    },
+    "documentType": "Lecture Notes",
+    "schoolYear": "2024-2025",
+    "downloadCount": {
+      "$numberInt": "78"
+    },
+    "viewCount": {
+      "$numberInt": "190"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "uploadDate": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "thumbnailUrl": "http://localhost:8000/uploads/thumbnails/seed-1786262207287-098638.png"
+  }
+]

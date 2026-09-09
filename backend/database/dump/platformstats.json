@@ -1,0 +1,19 @@
+[
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7f0"
+    },
+    "totalUploads": {
+      "$numberInt": "10"
+    },
+    "totalDownloads": {
+      "$numberInt": "539"
+    },
+    "activeUsers": {
+      "$numberInt": "7"
+    },
+    "__v": {
+      "$numberInt": "0"
+    }
+  }
+]

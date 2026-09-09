@@ -1,0 +1,212 @@
+[
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    },
+    "email": "admin@unishare.com",
+    "password": "$2b$10$PBIpzZaD.7UZAFLexPsP8u3rw/qrEkmAx6UbLmJ3luMDV1MHf1lW6",
+    "fullName": "System Admin",
+    "avatarUrl": null,
+    "role": "ADMIN",
+    "status": "ACTIVE",
+    "uploadsCount": {
+      "$numberInt": "0"
+    },
+    "downloadsCount": {
+      "$numberInt": "0"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "joinedDate": {
+      "$date": {
+        "$numberLong": "1786262207266"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207266"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7c2"
+    },
+    "email": "mod@st.phenikaa-uni.edu.vn",
+    "password": "$2b$10$SWn/NEbvX5gQ3A4QT0dmE.lJJMNuCR8fS12FbeMpoNWo9L0xPNnB6",
+    "fullName": "Nguyễn Văn Moderator",
+    "avatarUrl": null,
+    "role": "MODERATOR",
+    "status": "ACTIVE",
+    "uploadsCount": {
+      "$numberInt": "0"
+    },
+    "downloadsCount": {
+      "$numberInt": "0"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "joinedDate": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "email": "huy@st.phenikaa-uni.edu.vn",
+    "password": "$2b$10$SWn/NEbvX5gQ3A4QT0dmE.lJJMNuCR8fS12FbeMpoNWo9L0xPNnB6",
+    "fullName": "Vũ Viết Huy",
+    "avatarUrl": null,
+    "role": "USER",
+    "status": "ACTIVE",
+    "uploadsCount": {
+      "$numberInt": "3"
+    },
+    "downloadsCount": {
+      "$numberInt": "0"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "joinedDate": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207292"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "email": "minh@st.phenikaa-uni.edu.vn",
+    "password": "$2b$10$SWn/NEbvX5gQ3A4QT0dmE.lJJMNuCR8fS12FbeMpoNWo9L0xPNnB6",
+    "fullName": "Phạm Quang Minh",
+    "avatarUrl": null,
+    "role": "USER",
+    "status": "ACTIVE",
+    "uploadsCount": {
+      "$numberInt": "2"
+    },
+    "downloadsCount": {
+      "$numberInt": "0"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "joinedDate": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207304"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "email": "quang@st.phenikaa-uni.edu.vn",
+    "password": "$2b$10$SWn/NEbvX5gQ3A4QT0dmE.lJJMNuCR8fS12FbeMpoNWo9L0xPNnB6",
+    "fullName": "Nguyễn Văn Quang",
+    "avatarUrl": null,
+    "role": "USER",
+    "status": "ACTIVE",
+    "uploadsCount": {
+      "$numberInt": "2"
+    },
+    "downloadsCount": {
+      "$numberInt": "0"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "joinedDate": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207305"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "email": "tien@st.phenikaa-uni.edu.vn",
+    "password": "$2b$10$SWn/NEbvX5gQ3A4QT0dmE.lJJMNuCR8fS12FbeMpoNWo9L0xPNnB6",
+    "fullName": "Nguyễn Duy Tiến",
+    "avatarUrl": null,
+    "role": "USER",
+    "status": "ACTIVE",
+    "uploadsCount": {
+      "$numberInt": "2"
+    },
+    "downloadsCount": {
+      "$numberInt": "0"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "joinedDate": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207306"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    },
+    "email": "linh@st.phenikaa-uni.edu.vn",
+    "password": "$2b$10$SWn/NEbvX5gQ3A4QT0dmE.lJJMNuCR8fS12FbeMpoNWo9L0xPNnB6",
+    "fullName": "Hà Nguyễn Trúc Linh",
+    "avatarUrl": null,
+    "role": "USER",
+    "status": "ACTIVE",
+    "uploadsCount": {
+      "$numberInt": "1"
+    },
+    "downloadsCount": {
+      "$numberInt": "0"
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "joinedDate": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207307"
+      }
+    }
+  }
+]

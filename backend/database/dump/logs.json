@@ -1,0 +1,938 @@
+[
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f17c"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Vũ Viết Huy (huy@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f17d"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Phạm Quang Minh (minh@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f17e"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Nguyễn Văn Quang (quang@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f17f"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Vũ Viết Huy (huy@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f180"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Nguyễn Duy Tiến (tien@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f181"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Vũ Viết Huy (huy@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f182"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Hà Nguyễn Trúc Linh (linh@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f183"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Phạm Quang Minh (minh@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f184"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Nguyễn Văn Quang (quang@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f185"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "action": "LOGIN",
+    "details": "Đăng nhập: Nguyễn Duy Tiến (tien@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786261487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f186"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    },
+    "action": "REGISTER",
+    "details": "Đăng ký tài khoản mới: System Admin (admin@unishare.com)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207266"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f187"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c2"
+    },
+    "action": "REGISTER",
+    "details": "Đăng ký tài khoản mới: Nguyễn Văn Moderator (mod@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c2"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f188"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "REGISTER",
+    "details": "Đăng ký tài khoản mới: Vũ Viết Huy (huy@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f189"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "action": "REGISTER",
+    "details": "Đăng ký tài khoản mới: Phạm Quang Minh (minh@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f18a"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "action": "REGISTER",
+    "details": "Đăng ký tài khoản mới: Nguyễn Văn Quang (quang@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f18b"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "action": "REGISTER",
+    "details": "Đăng ký tài khoản mới: Nguyễn Duy Tiến (tien@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f18c"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    },
+    "action": "REGISTER",
+    "details": "Đăng ký tài khoản mới: Hà Nguyễn Trúc Linh (linh@st.phenikaa-uni.edu.vn)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f18d"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Slide bài giảng Nhập môn lập trình - Chương 1\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e0"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f18e"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Đề thi giữa kỳ Cấu trúc dữ liệu 2024\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e1"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f18f"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Tổng hợp lý thuyết Cơ sở dữ liệu\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e2"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f190"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Bài tập OOP Java có lời giải\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e3"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f191"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Đề cương ôn tập Mạng máy tính\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e4"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f192"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Báo cáo đồ án Phân tích thiết kế phần mềm\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e5"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f193"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Slide Trí tuệ nhân tạo - Machine Learning\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e6"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f194"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Cheat sheet Toán rời rạc\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e7"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f195"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Đề thi cuối kỳ Giải tích 1 (5 năm)\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e8"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f196"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "action": "UPLOAD_DOCUMENT",
+    "details": "Upload tài liệu \"Công thức Xác suất thống kê\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e9"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f197"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    },
+    "action": "PROMOTE_USER",
+    "details": "Thăng cấp Nguyễn Văn Moderator (mod@st.phenikaa-uni.edu.vn) từ USER lên MODERATOR",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786264007267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c2"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f198"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "action": "DOWNLOAD_DOCUMENT",
+    "details": "Tải tài liệu \"Slide bài giảng Nhập môn lập trình - Chương 1\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786265027289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e0"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f199"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    },
+    "action": "CREATE_SUBJECT",
+    "details": "Tạo môn học \"Nhập môn lập trình\" (CSE101)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786265807266"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f19a"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    },
+    "action": "CREATE_SUBJECT",
+    "details": "Tạo môn học \"Cấu trúc dữ liệu và giải thuật\" (CSE201)",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786266047266"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f19b"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    },
+    "action": "CREATE_MAJOR",
+    "details": "Tạo ngành học \"Công nghệ thông tin\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786266467266"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f19c"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "action": "DOWNLOAD_DOCUMENT",
+    "details": "Tải tài liệu \"Slide bài giảng Nhập môn lập trình - Chương 1\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786267847289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e0"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f19d"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    },
+    "action": "LOGOUT",
+    "details": "Đăng xuất khỏi hệ thống",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786269107266"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c1"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f19e"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "action": "DOWNLOAD_DOCUMENT",
+    "details": "Tải tài liệu \"Đề thi giữa kỳ Cấu trúc dữ liệu 2024\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786270667289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e1"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f19f"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c2"
+    },
+    "action": "BLOCK_DOCUMENT",
+    "details": "Block tài liệu \"Slide bài giảng Nhập môn lập trình - Chương 1\" của Vũ Viết Huy",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786273007289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e0"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a0"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "DOWNLOAD_DOCUMENT",
+    "details": "Tải tài liệu \"Tổng hợp lý thuyết Cơ sở dữ liệu\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786273487289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e2"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a1"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    },
+    "action": "DOWNLOAD_DOCUMENT",
+    "details": "Tải tài liệu \"Bài tập OOP Java có lời giải\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786276307289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e3"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a2"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c2"
+    },
+    "action": "UNBLOCK_DOCUMENT",
+    "details": "Bỏ block tài liệu \"Slide bài giảng Nhập môn lập trình - Chương 1\" của Vũ Viết Huy",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786278407289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e0"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a3"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "action": "DOWNLOAD_DOCUMENT",
+    "details": "Tải tài liệu \"Báo cáo đồ án Phân tích thiết kế phần mềm\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786279127289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e5"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a4"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "action": "DOWNLOAD_DOCUMENT",
+    "details": "Tải tài liệu \"Slide Trí tuệ nhân tạo - Machine Learning\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786281947289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e6"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a5"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c6"
+    },
+    "action": "DOWNLOAD_DOCUMENT",
+    "details": "Tải tài liệu \"Đề thi cuối kỳ Giải tích 1 (5 năm)\"",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786284767289"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e8"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a6"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "action": "UPDATE_PROFILE",
+    "details": "Cập nhật thông tin cá nhân: fullName",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786435007267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a7"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    },
+    "action": "CHANGE_PASSWORD",
+    "details": "Đổi mật khẩu thành công",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786694207267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c5"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7835520d215f6527f4f1a8"
+    },
+    "performedBy": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    },
+    "action": "FORGOT_PASSWORD",
+    "details": "Yêu cầu reset mật khẩu cho linh@st.phenikaa-uni.edu.vn",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1787039807267"
+      }
+    },
+    "__v": {
+      "$numberInt": "0"
+    },
+    "targetUser": {
+      "$oid": "6a7832bf06aef7954aabe7c7"
+    }
+  }
+]

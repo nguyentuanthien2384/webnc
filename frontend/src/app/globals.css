@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/* Cấu hình theme cho Tailwind v4 */
+@theme {
+  --color-bg: #ffffff;
+  --color-fg: #111111;
+  --color-bg-dark: #0a0a0a;
+  --color-fg-dark: #f5f5f5;
+}
+
+/* Khởi tạo biến CSS mặc định */
+:root {
+  --background: var(--color-bg);
+  --foreground: var(--color-fg);
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+/* Xử lý Dark Mode dựa trên class .dark */
+.dark {
+  --background: var(--color-bg-dark);
+  --foreground: var(--color-fg-dark);
+  color: var(--foreground);
+  background-color: var(--background);
+}

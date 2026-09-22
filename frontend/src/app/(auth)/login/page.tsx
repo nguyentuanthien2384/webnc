@@ -5,6 +5,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { getServerErrorMessage } from "@/lib/apiError";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "react-hot-toast";
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 
 export default function LoginPage() {
@@ -190,6 +191,10 @@ export default function LoginPage() {
           )}
         </button>
       </form>
+
+      <button type="button" className="mt-4 text-sm font-medium text-blue-600 hover:underline" onClick={() => toast("Vui lòng liên hệ quản trị viên để xác minh danh tính và hỗ trợ đặt lại mật khẩu.")}>
+        Quên mật khẩu?
+      </button>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-500">

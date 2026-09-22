@@ -34,8 +34,9 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const store = useAuthStore.getState();
-      if (store.isAuthenticated) {
-        store.logout();
+      const credentialCheck = ["/auth/login", "/users/me/change-password", "/users/me/account"].includes(error.config?.url ?? "");
+      if (!credentialCheck && store.isAuthenticated && error.config?.headers?.Authorization === `Bearer ${store.token}`) {
+        store.clearSession();
       }
     }
     return Promise.reject(error);

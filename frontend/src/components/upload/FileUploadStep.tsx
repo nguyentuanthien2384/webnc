@@ -2,6 +2,7 @@
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { CloudArrowUpIcon, DocumentIcon } from "@heroicons/react/24/outline";
+import { toast } from "react-hot-toast";
 
 interface FileUploadStepProps {
   onFilesAccepted: (files: File[]) => void;
@@ -10,13 +11,14 @@ interface FileUploadStepProps {
 export default function FileUploadStep({ onFilesAccepted }: FileUploadStepProps) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      onFilesAccepted(acceptedFiles);
+      if (acceptedFiles.length > 0) onFilesAccepted(acceptedFiles);
     },
     [onFilesAccepted],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected: () => toast.error("Chỉ chấp nhận PDF, DOC, DOCX và tối đa 100MB mỗi tệp."),
     accept: {
       "application/pdf": [".pdf"],
       "application/msword": [".doc"],

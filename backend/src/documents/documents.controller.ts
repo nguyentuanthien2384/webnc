@@ -76,19 +76,8 @@ export class DocumentsController {
   }
 
   @Get()
-  findAll(@Query() query: Record<string, string | string[]>) {
-    const dto = new GetDocumentsQueryDto();
-    Object.assign(dto, query);
-
-    if (query['subjects[]']) {
-      const raw = query['subjects[]'];
-      dto.subjects = Array.isArray(raw) ? raw : [raw];
-    } else if (query['subjects']) {
-      const raw = query['subjects'];
-      dto.subjects = Array.isArray(raw) ? raw : [raw];
-    }
-
-    return this.documentsService.findAll(dto);
+  findAll(@Query() queryDto: GetDocumentsQueryDto) {
+    return this.documentsService.findAll(queryDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

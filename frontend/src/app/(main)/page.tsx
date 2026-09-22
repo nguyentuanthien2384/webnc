@@ -11,12 +11,13 @@ import {
 import SortDropdown, { SortOption } from "@/components/common/SortDropdown";
 import FilterSidebar from "@/components/layout/FilterSidebar";
 import { useSearchStore } from "@/store/search.store";
+import Pagination from "@/components/common/Pagination";
 
 type ViewMode = "grid" | "list";
 
 const sortByOptions: SortOption[] = [
   { label: "Ngày đăng (Mới nhất)", value: "uploadDate" },
-  { label: "Lượt tải (Nhiều nhất)", value: "downloads" },
+  { label: "Lượt tải (Nhiều nhất)", value: "downloadCount" },
 ];
 
 const sortOrderOptions: SortOption[] = [
@@ -30,15 +31,21 @@ export default function HomePage() {
   const [sortOrder, setSortOrder] = useState<SortOption>(sortOrderOptions[0]);
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [pageState, setPageState] = useState({ key: "", page: 1 });
 
   const search = useSearchStore((state) => state.search);
+  const filterKey = JSON.stringify([search, sortBy.value, sortOrder.value, selectedSubjectIds]);
+  const page = pageState.key === filterKey ? pageState.page : 1;
+  const setPage = (page: number) => setPageState({ key: filterKey, page });
 
   const { data, isLoading, isError, isFetching } = useDocuments(
     sortBy.value,
     sortOrder.value,
     selectedSubjectIds,
     search,
+    page,
   );
+
 
   if (isLoading) {
     return (
@@ -176,6 +183,11 @@ export default function HomePage() {
               </div>
             )}
           </div>
+          <Pagination
+            page={data?.pagination.page ?? page}
+            totalPages={data?.pagination.totalPages ?? 1}
+            onPageChange={setPage}
+          />
         </div>
       </main>
     </>

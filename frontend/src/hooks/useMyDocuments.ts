@@ -6,17 +6,19 @@ import { Document } from "@/@types/document.type";
 // Copy interface DocumentsResponse từ useDocuments.ts
 interface DocumentsResponse {
   data: Document[];
-  pagination: { total: number /* ... */ };
+  pagination: { total: number; page: number; limit: number; totalPages: number };
 }
 
-const getMyDocuments = async (): Promise<DocumentsResponse> => {
-  const response = await api.get("/documents/my-uploads");
+const getMyDocuments = async (page: number, year: string, month: string): Promise<DocumentsResponse> => {
+  const response = await api.get("/documents/my-uploads", {
+    params: { page, limit: 10, year: year || undefined, month: month || undefined },
+  });
   return response.data;
 };
 
-export const useMyDocuments = () => {
+export const useMyDocuments = (page = 1, year = "", month = "") => {
   return useQuery({
-    queryKey: ["myDocuments"],
-    queryFn: getMyDocuments,
+    queryKey: ["myDocuments", page, year, month],
+    queryFn: () => getMyDocuments(page, year, month),
   });
 };

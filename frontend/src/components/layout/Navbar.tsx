@@ -193,7 +193,7 @@ export default function Navbar() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900">Xác nhận đăng xuất</h3>
               <p className="mt-2 text-sm text-gray-500">
-                Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
+                Bạn có chắc chắn muốn đăng xuất khỏi tất cả phiên đăng nhập?
               </p>
             </div>
             <div className="mt-6 flex gap-3">

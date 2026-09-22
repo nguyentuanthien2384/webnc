@@ -14,7 +14,6 @@ import { User, UserStatus } from '../users/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
-  private tokenBlacklist: Set<string> = new Set();
 
   constructor(
     private usersService: UsersService,
@@ -76,7 +75,7 @@ export class AuthService {
       throw new UnauthorizedException('Mật khẩu không chính xác.');
     }
 
-    const payload = { sub: user._id, email: user.email, role: user.role };
+    const payload = { sub: user._id, email: user.email, role: user.role, tokenVersion: user.tokenVersion ?? 0 };
     const accessToken = await this.jwtService.signAsync(payload);
 
     await this.logsService.createLog(
@@ -103,8 +102,9 @@ export class AuthService {
   }
 
   async logout(token: string, userId?: string): Promise<{ message: string }> {
-    this.tokenBlacklist.add(token);
+    void token;
     if (userId) {
+      await this.usersService.revokeSessions(userId);
       await this.logsService.createLog(
         userId,
         'LOGOUT',
@@ -115,33 +115,11 @@ export class AuthService {
     return { message: 'Đăng xuất thành công' };
   }
 
-  isTokenBlacklisted(token: string): boolean {
-    return this.tokenBlacklist.has(token);
-  }
-
-  async forgotPassword(
-    email: string,
-  ): Promise<{ message: string; resetToken?: string }> {
-    const user = await this.usersService.findOneByEmail(email);
-    if (!user) {
-      throw new UnauthorizedException('Email không tồn tại trong hệ thống.');
-    }
-
-    const resetToken = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const hashedNewPassword = await bcrypt.hash(resetToken, 10);
-    user.password = hashedNewPassword;
-    await (user as User & { save(): Promise<void> }).save();
-
-    await this.logsService.createLog(
-      String(user._id),
-      'FORGOT_PASSWORD',
-      String(user._id),
-      `Yêu cầu reset mật khẩu cho ${email}`,
-    );
-
+  forgotPassword(): { message: string } {
+    // Email delivery and ownership verification are not configured yet.
+    // Never change credentials or return a password to an anonymous caller.
     return {
-      message: `Mật khẩu mới đã được tạo. Vui lòng đăng nhập bằng mật khẩu mới và đổi mật khẩu ngay.`,
-      resetToken,
+      message: 'Vui lòng liên hệ quản trị viên để xác minh danh tính và hỗ trợ đặt lại mật khẩu.',
     };
   }
 }

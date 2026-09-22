@@ -10,6 +10,7 @@ import { LogsModule } from './logs/logs.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -22,8 +23,9 @@ import { join } from 'path';
       inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads',
+      rootPath: join(process.cwd(), 'uploads', 'thumbnails'),
+      serveRoot: '/uploads/thumbnails',
+      serveStaticOptions: { index: false, fallthrough: false },
     }),
     AuthModule,
     UsersModule,
@@ -32,6 +34,7 @@ import { join } from 'path';
     StatisticsModule,
     LogsModule,
     CategoriesModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

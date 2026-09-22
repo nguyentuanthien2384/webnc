@@ -8,7 +8,8 @@ import {
 } from "@/hooks/useUserProfile";
 import DocumentCard from "@/components/documents/DocumentCard";
 import { useAuthStore } from "@/store/auth.store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Pagination from "@/components/common/Pagination";
 import { User } from "@/@types/user.type";
 import {
   CloudArrowUpIcon,
@@ -103,6 +104,8 @@ export default function UserProfilePage() {
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
 
   const userId = params.userId as string;
+  const [pageState, setPageState] = useState({ userId, page: 1 });
+  const page = pageState.userId === userId ? pageState.page : 1;
 
   useEffect(() => {
     if (hasHydrated) {
@@ -114,7 +117,7 @@ export default function UserProfilePage() {
 
   const { data: user, isLoading: isLoadingProfile } = useUserProfile(userId);
   const { data: stats, isLoading: isLoadingStats } = useUserStats(userId);
-  const { data: docData, isLoading: isLoadingDocs } = useUserDocuments(userId);
+  const { data: docData, isLoading: isLoadingDocs, isError: isDocsError } = useUserDocuments(userId, page);
 
   if (!hasHydrated) {
     return <main className="flex-1 p-8 bg-gray-50"><p>Đang tải phiên...</p></main>;
@@ -169,6 +172,7 @@ export default function UserProfilePage() {
 
           <div>
             {isLoadingDocs && <p className="p-6 text-gray-500">Đang tải tài liệu...</p>}
+            {isDocsError && <p className="p-6 text-red-600">Không thể tải tài liệu. Vui lòng thử lại.</p>}
             {docData && docData.data.length > 0 ? (
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
                 {docData.data.map((doc) => (
@@ -176,7 +180,7 @@ export default function UserProfilePage() {
                 ))}
               </div>
             ) : (
-              !isLoadingDocs && (
+              !isLoadingDocs && !isDocsError && (
                 <div className="p-12 text-center">
                   <DocumentTextIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500">Người dùng này chưa đăng tải tài liệu nào.</p>
@@ -185,6 +189,7 @@ export default function UserProfilePage() {
             )}
           </div>
         </div>
+        <Pagination page={page} totalPages={docData?.pagination.totalPages ?? 0} onPageChange={(page) => setPageState({ userId, page })} />
       </div>
     </main>
   );

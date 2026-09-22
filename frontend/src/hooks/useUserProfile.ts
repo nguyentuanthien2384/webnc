@@ -24,8 +24,8 @@ const getUserStats = async (userId: string): Promise<UserStats> => {
   return response.data;
 };
 
-const getUserDocuments = async (userId: string): Promise<UserDocumentsResponse> => {
-  const response = await api.get(`/documents/user/${userId}/uploads`);
+const getUserDocuments = async (userId: string, page: number): Promise<UserDocumentsResponse> => {
+  const response = await api.get(`/documents/user/${userId}/uploads`, { params: { page, limit: 10 } });
   return response.data;
 };
 
@@ -45,10 +45,10 @@ export const useUserStats = (userId: string) => {
   });
 };
 
-export const useUserDocuments = (userId: string) => {
+export const useUserDocuments = (userId: string, page = 1) => {
   return useQuery({
-    queryKey: ["userDocuments", userId],
-    queryFn: () => getUserDocuments(userId),
+    queryKey: ["userDocuments", userId, page],
+    queryFn: () => getUserDocuments(userId, page),
     enabled: !!userId,
   });
 };

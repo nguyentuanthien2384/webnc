@@ -6,6 +6,7 @@ import ManageMajors from "./components/ManagerMajors";
 import ManageUsers from "./components/ManagerUsers";
 import ManageDocuments from "./components/ManagerDocuments";
 import ManageLogs from "./components/ManagerLogs";
+import ManageReports from "./components/ManagerReports";
 import { useAuthStore } from "@/store/auth.store";
 import {
   AcademicCapIcon,
@@ -15,7 +16,7 @@ import {
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 
-type TabType = "subjects" | "majors" | "users" | "documents" | "logs";
+type TabType = "subjects" | "majors" | "users" | "documents" | "logs" | "reports";
 
 export default function ManagePage() {
   const [tab, setTab] = useState<TabType>("documents");
@@ -33,7 +34,8 @@ export default function ManagePage() {
     { key: "logs" as const, label: "Logs hệ thống", icon: ClipboardDocumentListIcon },
   ];
 
-  const tabs = isAdmin ? [...baseTabs, ...adminTabs] : [baseTabs[2], adminTabs[0]];
+  const reportTab = { key: "reports" as const, label: "Báo cáo", icon: ClipboardDocumentListIcon };
+  const tabs = isAdmin ? [...baseTabs, reportTab, ...adminTabs] : [baseTabs[2], reportTab, adminTabs[0]];
 
   return (
     <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]}>
@@ -74,6 +76,7 @@ export default function ManagePage() {
               {tab === "documents" && <ManageDocuments />}
               {tab === "users" && <ManageUsers />}
               {tab === "logs" && isAdmin && <ManageLogs />}
+              {tab === "reports" && <ManageReports />}
             </div>
           </div>
         </div>

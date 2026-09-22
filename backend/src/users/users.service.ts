@@ -15,6 +15,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { LogsService } from '../logs/logs.service';
 import { StatisticsService } from '../statistics/statistics.service';
 import * as bcrypt from 'bcrypt';
+import { deleteDocumentFiles } from '../common/document-storage';
 
 @Injectable()
 export class UsersService {
@@ -84,6 +85,7 @@ export class UsersService {
     }
 
     user.password = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await user.save();
 
     await this.logsService.createLog(
@@ -104,6 +106,10 @@ export class UsersService {
       { _id: userId },
       { $inc: { uploadsCount: amount } },
     );
+  }
+
+  async revokeSessions(userId: string): Promise<void> {
+    await this.userModel.updateOne({ _id: userId }, { $inc: { tokenVersion: 1 } });
   }
 
   async incrementTotalDownloads(userId: string, amount: number = 1) {
@@ -131,6 +137,7 @@ export class UsersService {
       throw new UnauthorizedException('Mật khẩu không chính xác');
     }
 
+    const files = await this.documentModel.find({ uploader: userId }).select('filePath fileUrl thumbnailUrl').exec();
     const deletedDocs = await this.documentModel.deleteMany({
       uploader: userId,
     });
@@ -141,6 +148,7 @@ export class UsersService {
       `Xóa tài khoản ${user.fullName} (${user.email}) và toàn bộ tài liệu`,
     );
     await this.userModel.findByIdAndDelete(userId);
+    await Promise.all(files.map((doc) => deleteDocumentFiles(doc)));
     if (user.status === UserStatus.ACTIVE) {
       await this.statisticsService.incrementActiveUsers(-1);
     }

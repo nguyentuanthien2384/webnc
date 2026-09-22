@@ -21,6 +21,7 @@ import DeleteAccountModal from "@/components/profile/DeleteAccountModal";
 import Link from "next/link";
 import api from "@/lib/axios";
 import { toast } from "react-hot-toast";
+import Pagination from "@/components/common/Pagination";
 
 interface MyDocumentListItemProps {
   doc: Document;
@@ -73,7 +74,7 @@ function MyDocumentListItem({ doc, onEdit, onDelete }: MyDocumentListItemProps) 
           </div>
         </div>
       </Link>
-      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+      <div className="flex gap-1 transition">
         <button
           onClick={handleDownload}
           className="p-2 rounded-lg hover:bg-blue-50 transition"
@@ -101,7 +102,7 @@ function MyDocumentListItem({ doc, onEdit, onDelete }: MyDocumentListItemProps) 
 }
 
 export default function MyProfilePage() {
-  const { data: docData, isLoading, isError } = useMyDocuments();
+  const [page, setPage] = useState(1);
   const deleteMutation = useDeleteDocument();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -112,6 +113,7 @@ export default function MyProfilePage() {
   const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
   const [filterYear, setFilterYear] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
+  const { data: docData, isLoading, isError } = useMyDocuments(page, filterYear, filterMonth);
 
   const { data: apiUser } = useMyProfile();
   const storeUser = useAuthStore((s) => s.user);
@@ -133,21 +135,17 @@ export default function MyProfilePage() {
         onSuccess: () => {
           setIsDeleteModalOpen(false);
           setSelectedDoc(null);
+          setPage(1);
         },
       });
     }
   };
 
-  const filteredDocs = docData?.data.filter((doc) => {
-    const date = new Date(doc.uploadDate);
-    if (filterYear && date.getFullYear().toString() !== filterYear) return false;
-    if (filterMonth && (date.getMonth() + 1).toString() !== filterMonth) return false;
-    return true;
-  }) || [];
-
-  const years = Array.from(
-    new Set(docData?.data.map((d) => new Date(d.uploadDate).getFullYear()) || [])
-  ).sort((a, b) => b - a);
+  const filteredDocs = docData?.data ?? [];
+  const currentYear = new Date().getFullYear();
+  const joinedYear = user?.joinedDate ? new Date(user.joinedDate).getFullYear() : currentYear;
+  const firstYear = Number.isFinite(joinedYear) ? Math.min(joinedYear, currentYear) : currentYear;
+  const years = Array.from({ length: currentYear - firstYear + 1 }, (_, index) => currentYear - index);
 
   if (!user) {
     return (
@@ -172,7 +170,7 @@ export default function MyProfilePage() {
             <div>
               <h2 className="text-xl font-bold text-gray-900">Tài liệu của tôi</h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                {filteredDocs.length} tài liệu
+                {docData?.pagination.total ?? 0} tài liệu
                 {(filterYear || filterMonth) && " (đã lọc)"}
               </p>
             </div>
@@ -180,7 +178,8 @@ export default function MyProfilePage() {
               <FunnelIcon className="w-4 h-4 text-gray-400" />
               <select
                 value={filterYear}
-                onChange={(e) => setFilterYear(e.target.value)}
+                aria-label="Lọc theo năm"
+                onChange={(e) => { setFilterYear(e.target.value); setPage(1); }}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white"
               >
                 <option value="">Tất cả năm</option>
@@ -190,7 +189,8 @@ export default function MyProfilePage() {
               </select>
               <select
                 value={filterMonth}
-                onChange={(e) => setFilterMonth(e.target.value)}
+                aria-label="Lọc theo tháng"
+                onChange={(e) => { setFilterMonth(e.target.value); setPage(1); }}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg bg-white"
               >
                 <option value="">Tất cả tháng</option>
@@ -214,7 +214,7 @@ export default function MyProfilePage() {
                     onDelete={handleDeleteClick}
                   />
                 ))
-              : !isLoading && (
+              : !isLoading && !isError && (
                   <div className="p-12 text-center">
                     <DocumentIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500">
@@ -234,6 +234,8 @@ export default function MyProfilePage() {
                 )}
           </div>
         </div>
+
+        <Pagination page={page} totalPages={docData?.pagination.totalPages ?? 0} onPageChange={setPage} />
 
         {/* Danger Zone */}
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-red-200 overflow-hidden">

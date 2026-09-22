@@ -17,6 +17,10 @@ import { UpdateDocumentDto } from './dto/update-document.dto';
 import { StatisticsService } from '../statistics/statistics.service';
 import { LogsService } from '../logs/logs.service';
 import { ConfigService } from '@nestjs/config';
+import { deleteDocumentFiles, resolveUploadPath } from '../common/document-storage';
+
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 @Injectable()
 export class DocumentsService {
@@ -54,10 +58,9 @@ export class DocumentsService {
 
   private getLocalFilePath(doc: Document): string {
     const storedPath = (doc as unknown as Record<string, string>).filePath;
-    return join(
-      process.cwd(),
-      storedPath || doc.fileUrl.replace(/^https?:\/\/[^/]+\//, ''),
-    );
+    const path = resolveUploadPath(storedPath || doc.fileUrl);
+    if (!path) throw new NotFoundException('File not found on server storage.');
+    return path;
   }
 
   private async generateThumbnail(
@@ -225,9 +228,10 @@ export class DocumentsService {
     const query: Record<string, unknown> = { status: 'VISIBLE' };
 
     if (search) {
+      const safeSearch = escapeRegex(search.trim());
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { title: { $regex: safeSearch, $options: 'i' } },
+        { description: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
@@ -265,10 +269,19 @@ export class DocumentsService {
       const subjectIds: Types.ObjectId[] = subjectsInFaculty.map(
         (subject) => subject._id as Types.ObjectId,
       );
-      if (subjectIds.length > 0) {
-        query.subject = query.subject
-          ? { $in: subjectIds }
-          : { $in: subjectIds };
+      if (subjectIds.length === 0) {
+        query.subject = { $in: [] };
+      } else if (query.subject) {
+        const selectedSubjectIds = subjects
+          ? subjects.map((id) => new Types.ObjectId(id))
+          : [new Types.ObjectId(subject as string)];
+        query.subject = {
+          $in: selectedSubjectIds.filter((id) =>
+            subjectIds.some((facultyId) => facultyId.equals(id)),
+          ),
+        };
+      } else {
+        query.subject = { $in: subjectIds };
       }
     }
 
@@ -314,7 +327,7 @@ export class DocumentsService {
     }
 
     doc.viewCount += 1;
-    void doc.save();
+    await doc.save();
 
     return doc;
   }
@@ -373,6 +386,7 @@ export class DocumentsService {
 
     const docTitle = doc.title;
     await doc.deleteOne();
+    await deleteDocumentFiles(doc);
 
     await this.usersService.incrementUploadCount(userId, -1);
     await this.statisticsService.incrementTotalUploads(-1);
@@ -400,9 +414,20 @@ export class DocumentsService {
       status: DocumentStatus.VISIBLE,
     };
 
-    if (search) query.title = { $regex: search, $options: 'i' };
+    const calendarFilters: Record<string, unknown>[] = [];
+    if (queryDto.year) {
+      calendarFilters.push({ $eq: [{ $year: { date: '$uploadDate', timezone: 'Asia/Ho_Chi_Minh' } }, queryDto.year] });
+    }
+    if (queryDto.month) {
+      calendarFilters.push({ $eq: [{ $month: { date: '$uploadDate', timezone: 'Asia/Ho_Chi_Minh' } }, queryDto.month] });
+    }
+    if (calendarFilters.length) query.$expr = { $and: calendarFilters };
 
-    const sortField = sortBy === 'downloads' ? 'downloadCount' : 'uploadDate';
+    if (search) {
+      query.title = { $regex: escapeRegex(search.trim()), $options: 'i' };
+    }
+
+    const sortField = ['downloads', 'downloadCount'].includes(sortBy) ? 'downloadCount' : 'uploadDate';
     const sortOrderValue = sortOrder === 'asc' ? 1 : -1;
     const sortOptions: Record<string, 1 | -1> = {
       [sortField]: sortOrderValue,
@@ -445,9 +470,11 @@ export class DocumentsService {
       status: 'VISIBLE',
     };
 
-    if (search) query.title = { $regex: search, $options: 'i' };
+    if (search) {
+      query.title = { $regex: escapeRegex(search.trim()), $options: 'i' };
+    }
 
-    const sortField = sortBy === 'downloads' ? 'downloadCount' : 'uploadDate';
+    const sortField = ['downloads', 'downloadCount'].includes(sortBy) ? 'downloadCount' : 'uploadDate';
     const sortOrderValue = sortOrder === 'asc' ? 1 : -1;
     const sortOptions: Record<string, 1 | -1> = {
       [sortField]: sortOrderValue,

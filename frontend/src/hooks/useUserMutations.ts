@@ -34,11 +34,15 @@ export const useUpdateProfile = () => {
 };
 
 export const useChangePassword = () => {
+  const clearSession = useAuthStore((s) => s.clearSession);
   return useMutation({
     mutationFn: async (data: ChangePasswordDto): Promise<void> => {
       await api.post("/users/me/change-password", data);
     },
-    onSuccess: () => toast.success("Đổi mật khẩu thành công!"),
+    onSuccess: () => {
+      clearSession();
+      toast.success("Đổi mật khẩu thành công. Vui lòng đăng nhập lại.");
+    },
     onError: (err: unknown) => {
       toast.error(getApiErrorMessage(err, "Lỗi đổi mật khẩu."));
     },

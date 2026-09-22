@@ -16,7 +16,7 @@ describe('AuthService', () => {
   // Partial biến mỗi thuộc tính thành `hàm | undefined`, không khớp nhánh
   // `extends (...args: any[]) => any` trong jest.Mocked nên mất mockResolvedValue.
   let usersService: jest.Mocked<
-    Pick<UsersService, 'findOneByEmail' | 'create'>
+    Pick<UsersService, 'findOneByEmail' | 'create' | 'revokeSessions'>
   >;
   let jwtService: jest.Mocked<Pick<JwtService, 'signAsync'>>;
   let statisticsService: jest.Mocked<
@@ -49,6 +49,7 @@ describe('AuthService', () => {
     usersService = {
       findOneByEmail: jest.fn(),
       create: jest.fn(),
+      revokeSessions: jest.fn().mockResolvedValue(undefined),
     };
 
     jwtService = {
@@ -191,6 +192,7 @@ describe('AuthService', () => {
         sub: mockUser._id,
         email: mockUser.email,
         role: mockUser.role,
+        tokenVersion: 0,
       });
     });
 

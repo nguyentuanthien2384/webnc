@@ -3,7 +3,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../users/users.service';
-import { AuthService } from '../auth.service';
 import { UserStatus } from '../../users/schemas/user.schema';
 import { Request } from 'express';
 
@@ -11,6 +10,7 @@ interface JwtPayload {
   sub: string;
   email: string;
   role: string;
+  tokenVersion?: number;
 }
 
 @Injectable()
@@ -18,7 +18,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
     private usersService: UsersService,
-    private authService: AuthService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -28,14 +27,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(req: Request, payload: JwtPayload) {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (token && this.authService.isTokenBlacklisted(token)) {
-      throw new UnauthorizedException('Token đã bị vô hiệu hóa (đã đăng xuất)');
-    }
-
+  async validate(_req: Request, payload: JwtPayload) {
     const user = await this.usersService.findOneByEmail(payload.email);
-    if (!user) {
+    if (!user || String(user._id) !== String(payload.sub) || (user.tokenVersion ?? 0) !== (payload.tokenVersion ?? 0)) {
       throw new UnauthorizedException();
     }
 
@@ -44,7 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     return {
-      userId: user._id,
+      userId: String(user._id),
       email: user.email,
       role: user.role,
     };

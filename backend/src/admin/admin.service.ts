@@ -21,6 +21,7 @@ import { UpdateMajorDto } from './dto/update-major.dto';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { GetDocumentsQueryDto } from '../documents/dto/get-documents-query.dto';
+import { deleteDocumentFiles } from '../common/document-storage';
 
 interface UserAggregateResult {
   data: User[];
@@ -185,11 +186,13 @@ export class AdminService {
     if (userId === actorId || user.role === UserRole.ADMIN) {
       throw new ForbiddenException('Không thể xóa tài khoản Admin');
     }
+    const files = await this.documentModel.find({ uploader: userId }).select('filePath fileUrl thumbnailUrl').exec();
     const deletedDocs = await this.documentModel.deleteMany({
       uploader: userId,
     });
     const deletedUser = await this.userModel.findByIdAndDelete(userId);
     if (!deletedUser) throw new NotFoundException('User not found');
+    await Promise.all(files.map((doc) => deleteDocumentFiles(doc)));
     if (user.status === UserStatus.ACTIVE) {
       await this.statisticsService.incrementActiveUsers(-1);
     }
@@ -219,6 +222,10 @@ export class AdminService {
     };
     const title = doc.title;
     await doc.deleteOne();
+    await deleteDocumentFiles(doc);
+    if (doc.uploader) {
+      await this.userModel.updateOne({ _id: doc.uploader._id }, { $inc: { uploadsCount: -1 } });
+    }
     await this.statisticsService.incrementTotalUploads(-1);
     await this.logsService.createLog(
       actorId,
@@ -385,6 +392,7 @@ export class AdminService {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
+    user.tokenVersion = (user.tokenVersion ?? 0) + 1;
     await user.save();
 
     await this.logsService.createLog(
@@ -601,7 +609,7 @@ export class AdminService {
       query.$or = [{ title: { $regex: search, $options: 'i' } }];
     }
 
-    const sortField = sortBy === 'downloads' ? 'downloadCount' : 'uploadDate';
+    const sortField = ['downloads', 'downloadCount'].includes(sortBy) ? 'downloadCount' : 'uploadDate';
     const sortOrderValue = sortOrder === 'asc' ? 1 : -1;
     const sortOptions: Record<string, 1 | -1> = {
       [sortField]: sortOrderValue,

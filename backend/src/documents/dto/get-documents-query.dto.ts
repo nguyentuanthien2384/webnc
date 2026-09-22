@@ -6,21 +6,41 @@ import {
   Min,
   IsArray,
   IsDateString,
+  Max,
+  IsMongoId,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class GetDocumentsQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1900)
+  @Max(9999)
+  year?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  month?: number;
+
   @IsOptional()
   @IsString()
   search?: string;
 
   @IsOptional()
   @IsString()
+  @IsMongoId()
   subject?: string;
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value : value == null ? value : [value],
+  )
+  @IsMongoId({ each: true })
   subjects?: string[];
 
   @IsOptional()
@@ -29,6 +49,7 @@ export class GetDocumentsQueryDto {
 
   @IsOptional()
   @IsString()
+  @IsMongoId()
   uploader?: string;
 
   @IsOptional()
@@ -44,7 +65,7 @@ export class GetDocumentsQueryDto {
   faculty?: string;
 
   @IsOptional()
-  @IsIn(['uploadDate', 'downloadCount'])
+  @IsIn(['uploadDate', 'downloadCount', 'downloads'])
   sortBy?: string = 'uploadDate';
 
   @IsOptional()
@@ -61,5 +82,6 @@ export class GetDocumentsQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(100)
   limit?: number;
 }

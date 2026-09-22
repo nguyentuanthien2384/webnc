@@ -20,6 +20,7 @@ import { useAuthStore } from "@/store/auth.store";
 import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { getDocumentPreviewUrl } from "@/components/documents/DocumentPreview";
+import ReportDocumentModal from "./ReportDocumentModal";
 
 interface DocumentCardProps {
   doc: Document;
@@ -83,6 +84,7 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
   const user = useAuthStore((s) => s.user);
   const queryClient = useQueryClient();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   const isOwner = user && doc.uploader?._id === user._id;
   const canDelete = isOwner || user?.role === "ADMIN";
@@ -142,7 +144,7 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
     } catch (err: unknown) {
       if (getApiErrorStatus(err) === 401) {
         toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", { id: downloadToastId });
-        useAuthStore.getState().logout();
+        useAuthStore.getState().clearSession();
       } else {
         toast.error("Tải xuống thất bại.", { id: downloadToastId });
       }
@@ -150,7 +152,8 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
   };
 
   const handleReport = () => {
-    toast("Tính năng Report (Báo cáo) đang được phát triển!", { icon: "🚧" });
+    if (!user) { toast.error("Vui lòng đăng nhập để gửi báo cáo."); return; }
+    setIsReportOpen(true);
   };
 
   const handleDelete = async () => {
@@ -172,7 +175,7 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
     } catch (err: unknown) {
       if (getApiErrorStatus(err) === 401) {
         toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", { id: toastId });
-        useAuthStore.getState().logout();
+        useAuthStore.getState().clearSession();
       } else {
         toast.error(getApiErrorMessage(err, "Xóa tài liệu thất bại."), {
           id: toastId,
@@ -206,6 +209,7 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
   return (
     <>
       {cardContent}
+      {isReportOpen && <ReportDocumentModal documentId={doc._id} title={doc.title} onClose={() => setIsReportOpen(false)} />}
       <DeleteConfirmModal
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}

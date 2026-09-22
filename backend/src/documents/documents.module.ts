@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { BadRequestException, Module } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { DocumentsController } from './documents.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -33,11 +33,11 @@ import { randomBytes } from 'crypto';
             'application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           ];
-          if (allowedMimes.includes(file.mimetype)) {
+          if (allowedMimes.includes(file.mimetype) && ['.pdf', '.doc', '.docx'].includes(extname(file.originalname).toLowerCase())) {
             callback(null, true);
           } else {
             callback(
-              new Error('Chỉ cho phép upload file .pdf, .doc hoặc .docx'),
+              new BadRequestException('Chỉ cho phép upload file .pdf, .doc hoặc .docx'),
               false,
             );
           }

@@ -20,7 +20,7 @@ export default function DeleteAccountModal({
 }: DeleteAccountModalProps) {
   const [password, setPassword] = useState("");
   const [confirmText, setConfirmText] = useState("");
-  const logout = useAuthStore((s) => s.logout);
+  const logout = useAuthStore((s) => s.clearSession);
   const router = useRouter();
 
   const deleteMutation = useMutation({

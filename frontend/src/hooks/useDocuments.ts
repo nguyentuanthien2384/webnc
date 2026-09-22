@@ -18,12 +18,15 @@ export const useDocuments = (
   sortOrder: string,
   subjectIds: string[],
   search: string,
+  page = 1,
 ) => {
   const getDocuments = async (): Promise<DocumentsResponse> => {
     const params: Record<string, unknown> = {
       sortBy,
       sortOrder,
       search: search || undefined,
+      page,
+      limit: 12,
     };
 
     if (subjectIds.length > 0) {
@@ -32,13 +35,13 @@ export const useDocuments = (
 
     const response = await api.get("/documents", {
       params,
-      paramsSerializer: (p) => qs.stringify(p, { arrayFormat: "brackets" }),
+      paramsSerializer: (p) => qs.stringify(p, { arrayFormat: "repeat" }),
     });
     return response.data;
   };
 
   return useQuery({
-    queryKey: ["documents", sortBy, sortOrder, subjectIds.join(","), search],
+    queryKey: ["documents", sortBy, sortOrder, subjectIds.join(","), search, page],
     queryFn: getDocuments,
   });
 };

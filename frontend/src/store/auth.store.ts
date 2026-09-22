@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { User } from "@/@types/user.type";
 import { toast } from "react-hot-toast";
 import api from "@/lib/axios";
+import axios from "axios";
 
 interface AuthState {
   user: User | null;
@@ -10,14 +11,15 @@ interface AuthState {
   isAuthenticated: boolean;
   _hasHydrated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  clearSession: () => void;
   setHasHydrated: (hasHydrated: boolean) => void;
   setUser: (user: User) => void;
 }
 
 export const useAuthStore = create(
   persist<AuthState>(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
@@ -38,9 +40,27 @@ export const useAuthStore = create(
         }
       },
 
-      logout: () => {
+      clearSession: () => {
         set({ user: null, token: null, isAuthenticated: false });
-        toast.success("Đã đăng xuất");
+      },
+
+      logout: async () => {
+        const token = get().token;
+        get().clearSession();
+        if (!token) return;
+        try {
+          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {}, {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 10000,
+          });
+          toast.success("Đã đăng xuất khỏi tất cả phiên đăng nhập");
+        } catch (error) {
+          if (axios.isAxiosError(error) && error.response?.status === 401) {
+            toast.success("Đã đăng xuất");
+          } else {
+            toast.error("Đã thoát trên thiết bị này, nhưng chưa thể vô hiệu hóa phiên trên máy chủ.");
+          }
+        }
       },
     }),
     {

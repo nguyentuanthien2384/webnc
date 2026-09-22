@@ -13,6 +13,8 @@ const DOCUMENT_ACTIONS = new Set([
   'UPLOAD_DOCUMENT',
   'DOWNLOAD_DOCUMENT',
   'UPDATE_DOCUMENT',
+  'REPORT_DOCUMENT',
+  'RESOLVE_REPORT',
 ]);
 
 // Các action mà targetId trỏ tới môn học / ngành học: không gắn ref nào,

@@ -229,6 +229,29 @@ describe('UniShare API with isolated MongoDB', () => {
       .expect(200);
   });
 
+  it('validates dashboard upload trend ranges and returns a continuous series', async () => {
+    for (const invalidDays of ['7abc', '0', '366']) {
+      await request(app.getHttpServer())
+        .get('/api/statistics/uploads-over-time')
+        .query({ days: invalidDays })
+        .auth(modToken, { type: 'bearer' })
+        .expect(400);
+    }
+
+    const response = await request(app.getHttpServer())
+      .get('/api/statistics/uploads-over-time')
+      .query({ days: 7 })
+      .auth(modToken, { type: 'bearer' })
+      .expect(200);
+    expect(response.body).toHaveLength(7);
+    expect(
+      response.body.every(
+        (item: { date: string; count: number }) =>
+          /^\d{4}-\d{2}-\d{2}$/.test(item.date) && Number.isInteger(item.count),
+      ),
+    ).toBe(true);
+  });
+
   it.each([
     'page=0',
     'page=abc',
@@ -686,6 +709,15 @@ describe('UniShare API with isolated MongoDB', () => {
       .auth(token, { type: 'bearer' })
       .expect(200);
     expect(stats.body.totalUploads).toBe(0);
+    const platform = await request(app.getHttpServer())
+      .get('/api/statistics/platform')
+      .auth(modToken, { type: 'bearer' })
+      .expect(200);
+    // The remaining fixtures have download counts 0..12. The deleted
+    // document's downloads remain in the lifetime total, but not the average.
+    expect(platform.body.totalUploads).toBe(13);
+    expect(platform.body.avgDlPerDoc).toBe(6);
+    expect(platform.body.totalDownloads).toBeGreaterThan(0);
   });
 
   it('revokes old tokens after logout and after a password change', async () => {

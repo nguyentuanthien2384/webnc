@@ -69,3 +69,4 @@ export class Document extends mongoose.Document {
 }
 
 export const DocumentSchema = SchemaFactory.createForClass(Document);
+DocumentSchema.index({ uploadDate: -1 });

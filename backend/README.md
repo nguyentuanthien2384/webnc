@@ -21,6 +21,10 @@ Mặc định API ở `http://localhost:8000/api`. Để tạo quản trị viê
 - Khôi phục mật khẩu qua email với liên kết dùng một lần, hết hạn sau 15 phút; bản nháp trình soạn thảo riêng tư có thể gắn với tài liệu.
 - Quản trị người dùng, tài liệu, môn/ngành học; thống kê và nhật ký hoạt động.
 
+`GET /api/statistics/uploads-over-time?days=7` dành cho Admin/Moderator trả về đúng số ngày yêu cầu dưới dạng `{ date: "YYYY-MM-DD", count: number }`, gồm cả hôm nay và những ngày không có lượt tải lên (`count: 0`). Ngày và ranh giới ngày tính theo múi giờ `Asia/Ho_Chi_Minh` (UTC+7); thời điểm lưu trong MongoDB vẫn là UTC. `days` mặc định là 30, nhận số nguyên từ 1 đến 365.
+
+`GET /api/statistics/platform` giữ `totalDownloads` là tổng lượt tải tích lũy, kể cả lượt tải của tài liệu đã bị xóa. `totalUploads` là số tài liệu hiện còn; `avgDlPerDoc` là trung bình `downloadCount` của các tài liệu hiện còn (gồm tài liệu bị chặn), làm tròn hai chữ số. Vì hai chỉ số lượt tải có phạm vi khác nhau, không tính `avgDlPerDoc` bằng `totalDownloads / totalUploads`.
+
 Tệp tài liệu không được phục vụ trực tiếp qua `/uploads`. Truy cập qua các endpoint `/api/documents/:id/preview`, `/download` và `/thumbnail` để kiểm tra trạng thái tài liệu và quyền truy cập. Nếu đang dùng dữ liệu cũ với URL thumbnail dạng `/uploads/thumbnails/...`, chạy `npm run generate:thumbnails` một lần sau khi sao lưu dữ liệu để chuyển sang URL mới và tạo các ảnh còn thiếu.
 
 Khi tải tài liệu lên, API giới hạn 100 MB mỗi tệp và đối chiếu phần mở rộng, MIME cùng dấu hiệu định dạng trong nội dung tệp trước khi lưu bản ghi. PDF và DOCX được nhận diện bằng `file-type`; tệp DOC cũ được kiểm tra dấu hiệu CFBF. Tệp không hợp lệ bị từ chối và tệp tạm được dọn khỏi ổ đĩa.

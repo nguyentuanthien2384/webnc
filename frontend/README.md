@@ -16,3 +16,5 @@ Giao diện hỗ trợ tìm kiếm/lọc tài liệu, tải nhiều tài liệu 
 Trang chi tiết tài liệu hiển thị PDF trực tiếp bằng React-PDF với nút chuyển trang và phóng to/thu nhỏ; DOCX được hiển thị bằng `docx-preview`. Với tệp DOC cũ hoặc tệp không thể hiển thị, người dùng có thể mở tệp trong tab mới hoặc tải xuống.
 
 Trang **Thống kê hệ thống** có thể xuất CSV hoặc tệp Excel `.xlsx`. Excel gồm sheet tổng quan và dữ liệu tải lên theo khoảng 7/30/90 ngày đang chọn. Trong phần quản trị người dùng và tài liệu, nút **Xuất Excel (trang hiện tại)** lấy đúng các hàng đang hiển thị sau khi tìm kiếm, lọc và phân trang; tệp không tự bao gồm các trang khác. ExcelJS chỉ được tải vào trình duyệt khi người dùng chọn xuất Excel.
+
+**Dashboard** dành cho Admin/Moderator tổng hợp chỉ số nền tảng, xu hướng đăng tài liệu theo 7/30/90 ngày, số báo cáo chờ xử lý, tài liệu mới và tài liệu được tải nhiều. Nút **Làm mới** cập nhật các phần dữ liệu; mỗi phần hiển thị trạng thái tải, lỗi và cách thử lại riêng. Các lối tắt mở thẳng mục báo cáo hoặc tài liệu trong trang quản lý.

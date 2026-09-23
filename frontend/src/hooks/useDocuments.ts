@@ -19,6 +19,7 @@ export const useDocuments = (
   subjectIds: string[],
   search: string,
   page = 1,
+  limit = 12,
 ) => {
   const getDocuments = async (): Promise<DocumentsResponse> => {
     const params: Record<string, unknown> = {
@@ -26,7 +27,7 @@ export const useDocuments = (
       sortOrder,
       search: search || undefined,
       page,
-      limit: 12,
+      limit,
     };
 
     if (subjectIds.length > 0) {
@@ -41,7 +42,7 @@ export const useDocuments = (
   };
 
   return useQuery({
-    queryKey: ["documents", sortBy, sortOrder, subjectIds.join(","), search, page],
+    queryKey: ["documents", sortBy, sortOrder, subjectIds.join(","), search, page, limit],
     queryFn: getDocuments,
   });
 };

@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import RoleGuard from "@/components/auth/RoleGuard";
 import ManageSubjects from "./components/ManagerSubjects";
 import ManageMajors from "./components/ManagerMajors";
@@ -18,8 +19,9 @@ import {
 
 type TabType = "subjects" | "majors" | "users" | "documents" | "logs" | "reports";
 
-export default function ManagePage() {
-  const [tab, setTab] = useState<TabType>("documents");
+function ManageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuthStore();
   const isAdmin = user?.role === "ADMIN";
 
@@ -36,9 +38,12 @@ export default function ManagePage() {
 
   const reportTab = { key: "reports" as const, label: "Báo cáo", icon: ClipboardDocumentListIcon };
   const tabs = isAdmin ? [...baseTabs, reportTab, ...adminTabs] : [baseTabs[2], reportTab, adminTabs[0]];
+  const requestedTab = searchParams.get("tab");
+  const tab: TabType = tabs.some(({ key }) => key === requestedTab)
+    ? (requestedTab as TabType)
+    : "documents";
 
   return (
-    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]}>
       <main className="flex-1 bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -58,7 +63,9 @@ export default function ManagePage() {
                 {tabs.map(({ key, label, icon: Icon }) => (
                   <button
                     key={key}
-                    onClick={() => setTab(key)}
+                    type="button"
+                    onClick={() => router.push(`/admin/manager?tab=${key}`)}
+                    aria-current={tab === key ? "page" : undefined}
                     className={`flex items-center gap-2 px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
                       tab === key
                         ? "border-blue-500 text-blue-600 bg-blue-50/50"
@@ -83,6 +90,15 @@ export default function ManagePage() {
           </div>
         </div>
       </main>
+  );
+}
+
+export default function ManagePage() {
+  return (
+    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]}>
+      <Suspense fallback={<main className="flex-1 bg-gray-50 p-6" role="status">Đang tải trang quản lý…</main>}>
+        <ManageContent />
+      </Suspense>
     </RoleGuard>
   );
 }

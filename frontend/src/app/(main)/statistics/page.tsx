@@ -14,6 +14,8 @@ import {
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 
+const numberFormatter = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 });
+
 function StatCard({
   title,
   value,
@@ -35,7 +37,7 @@ function StatCard({
         </div>
         <div>
           <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">{title}</p>
-          <p className="text-3xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-3xl font-bold text-gray-900 mt-1">{typeof value === "number" ? numberFormatter.format(value) : value}</p>
         </div>
       </div>
     </div>
@@ -43,7 +45,7 @@ function StatCard({
 }
 
 function StatisticsPageContent() {
-  const { data: stats, isLoading } = usePlatformStats();
+  const { data: stats, isLoading, isError: statsError, refetch: refetchStats } = usePlatformStats();
   const [days, setDays] = useState(30);
   const [isExportingExcel, setIsExportingExcel] = useState(false);
   const { data: uploads = [], isLoading: uploadsLoading, isError: uploadsError } = useUploadsOverTime(days);
@@ -57,9 +59,9 @@ function StatisticsPageContent() {
       ["Nhóm", "Chỉ số", "Giá trị"],
       [
         ["Tổng quan", "Tổng tài liệu", stats.totalUploads],
-        ["Tổng quan", "Tổng lượt tải", stats.totalDownloads],
+        ["Tổng quan", "Lượt tải lũy kế", stats.totalDownloads],
         ["Tổng quan", "Người dùng hoạt động", stats.activeUsers],
-        ["Tổng quan", "Trung bình lượt tải / tài liệu", stats.avgDlPerDoc],
+        ["Tổng quan", "TB lượt tải / tài liệu hiện có", stats.avgDlPerDoc],
         ...uploads.map((item) => ["Tải lên theo ngày", item.date, item.count]),
       ],
     );
@@ -76,9 +78,9 @@ function StatisticsPageContent() {
           headers: ["Chỉ số", "Giá trị"],
           rows: [
             ["Tổng tài liệu", stats.totalUploads],
-            ["Tổng lượt tải", stats.totalDownloads],
+            ["Lượt tải lũy kế", stats.totalDownloads],
             ["Người dùng hoạt động", stats.activeUsers],
-            ["Trung bình lượt tải / tài liệu", stats.avgDlPerDoc],
+            ["TB lượt tải / tài liệu hiện có", stats.avgDlPerDoc],
             ["Khoảng thời gian tải lên (ngày)", days],
           ],
           widths: [38, 18],
@@ -115,7 +117,14 @@ function StatisticsPageContent() {
     );
   }
 
-  if (!stats) return <div className="flex-1 p-8">Không có dữ liệu.</div>;
+  if (!stats) return (
+    <main className="flex-1 bg-gray-50 p-8">
+      <div role={statsError ? "alert" : "status"} className="mx-auto max-w-7xl rounded-xl border border-gray-200 bg-white p-6 text-gray-700">
+        <p>{statsError ? "Không thể tải số liệu thống kê." : "Không có dữ liệu thống kê."}</p>
+        {statsError && <button type="button" onClick={() => void refetchStats()} className="mt-3 font-semibold text-blue-600 hover:underline">Thử lại</button>}
+      </div>
+    </main>
+  );
 
   return (
     <main className="flex-1 p-6 bg-gray-50">
@@ -148,16 +157,16 @@ function StatisticsPageContent() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Tổng uploads"
+            title="Tổng tài liệu"
             value={stats.totalUploads}
             icon={CloudArrowUpIcon}
             color="text-blue-600"
             bgColor="bg-blue-50"
           />
           <StatCard
-            title="Tổng downloads"
+            title="Lượt tải lũy kế"
             value={stats.totalDownloads}
             icon={ArrowDownTrayIcon}
             color="text-green-600"
@@ -171,19 +180,20 @@ function StatisticsPageContent() {
             bgColor="bg-purple-50"
           />
           <StatCard
-            title="TB tải/tài liệu"
+            title="TB tải / tài liệu hiện có"
             value={stats.avgDlPerDoc}
             icon={DocumentTextIcon}
             color="text-orange-600"
             bgColor="bg-orange-50"
           />
         </div>
+        <p className="mb-8 mt-3 text-xs text-gray-500">Tổng tài liệu gồm tài liệu bị chặn; lượt tải lũy kế tính cả tài liệu đã xóa.</p>
 
         {/* Chart */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Uploads theo thời gian</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Tài liệu được đăng theo thời gian</h2>
               <p className="text-sm text-gray-500 mt-0.5">Biểu đồ số lượng tài liệu được tải lên</p>
             </div>
             <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
@@ -194,6 +204,8 @@ function StatisticsPageContent() {
               ].map(({ d, label }) => (
                 <button
                   key={d}
+                  type="button"
+                  aria-pressed={days === d}
                   onClick={() => setDays(d)}
                   className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${
                     days === d

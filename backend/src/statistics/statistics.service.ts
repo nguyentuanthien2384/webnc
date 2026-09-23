@@ -5,6 +5,8 @@ import { Document } from '../documents/schemas/document.schema';
 import { User } from '../users/schemas/user.schema';
 import { PlatformStats } from './schemas/platform-stats.schema';
 
+const VIETNAM_UTC_OFFSET_MS = 7 * 60 * 60 * 1000;
+
 @Injectable()
 export class StatisticsService {
   constructor(
@@ -15,46 +17,93 @@ export class StatisticsService {
   ) {}
 
   async getPlatformStats() {
-    let stats = await this.platformStatsModel.findOne();
+    const [storedStats, documentTotals] = await Promise.all([
+      this.platformStatsModel.findOne(),
+      this.documentModel.aggregate<{
+        totalUploads: number;
+        currentDocumentDownloads: number;
+      }>([
+        {
+          $group: {
+            _id: null,
+            totalUploads: { $sum: 1 },
+            currentDocumentDownloads: {
+              $sum: { $ifNull: ['$downloadCount', 0] },
+            },
+          },
+        },
+      ]),
+    ]);
+    let stats = storedStats;
     if (!stats) {
       stats = await this.platformStatsModel.create({});
     }
-    return this.formatStats(stats);
+    return this.formatStats(stats, documentTotals[0]);
   }
 
-  private formatStats(stats: PlatformStats) {
-    const { totalUploads, totalDownloads, activeUsers } = stats;
-    const avgDlPerDoc = totalUploads > 0 ? totalDownloads / totalUploads : 0;
+  private formatStats(
+    stats: PlatformStats,
+    documentTotals?: {
+      totalUploads: number;
+      currentDocumentDownloads: number;
+    },
+  ) {
+    const totalUploads = documentTotals?.totalUploads ?? 0;
+    const { totalDownloads, activeUsers } = stats;
+    const currentDocumentAverage =
+      totalUploads > 0
+        ? (documentTotals?.currentDocumentDownloads ?? 0) / totalUploads
+        : 0;
 
     return {
       totalUploads,
       totalDownloads,
       activeUsers,
-      avgDlPerDoc: parseFloat(avgDlPerDoc.toFixed(2)),
+      avgDlPerDoc: parseFloat(currentDocumentAverage.toFixed(2)),
     };
   }
 
   async getUploadsOverTime(days: number = 30) {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-    startDate.setHours(0, 0, 0, 0);
+    // Vietnam has no daylight saving time. Shift to UTC+7 for calendar math,
+    // then shift the query bounds back to UTC instants for MongoDB storage.
+    const localToday = new Date(Date.now() + VIETNAM_UTC_OFFSET_MS);
+    localToday.setUTCHours(0, 0, 0, 0);
+    const localStartDate = new Date(localToday);
+    localStartDate.setUTCDate(localStartDate.getUTCDate() - days + 1);
+    const startDate = new Date(
+      localStartDate.getTime() - VIETNAM_UTC_OFFSET_MS,
+    );
+    const endDate = new Date(
+      localToday.getTime() + 24 * 60 * 60 * 1000 - VIETNAM_UTC_OFFSET_MS,
+    );
 
     const results: { date: string; count: number }[] =
       await this.documentModel.aggregate([
-        { $match: { uploadDate: { $gte: startDate } } },
+        { $match: { uploadDate: { $gte: startDate, $lt: endDate } } },
         {
           $group: {
             _id: {
-              $dateToString: { format: '%Y-%m-%d', date: '$uploadDate' },
+              $dateToString: {
+                format: '%Y-%m-%d',
+                date: '$uploadDate',
+                timezone: 'Asia/Ho_Chi_Minh',
+              },
             },
             count: { $sum: 1 },
           },
         },
-        { $sort: { _id: 1 } },
         { $project: { _id: 0, date: '$_id', count: '$count' } },
       ]);
 
-    return results;
+    const countsByDate = new Map(
+      results.map(({ date, count }) => [date, count]),
+    );
+    return Array.from({ length: days }, (_, offset) => {
+      const date = new Date(localStartDate);
+      date.setUTCDate(date.getUTCDate() + offset);
+      const dateKey = date.toISOString().slice(0, 10);
+      return { date: dateKey, count: countsByDate.get(dateKey) ?? 0 };
+    });
   }
 
   async incrementTotalUploads(amount: number = 1) {

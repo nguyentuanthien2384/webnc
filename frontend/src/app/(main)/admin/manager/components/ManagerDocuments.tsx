@@ -11,9 +11,13 @@ import { Document as DocType } from "@/@types/document.type";
 import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import { useAuthStore } from "@/store/auth.store"; // Import để kiểm tra quyền Admin
 import Pagination from "@/components/common/Pagination";
+import { downloadExcel } from "@/lib/downloadExcel";
+import { toast } from "react-hot-toast";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 export default function ManageDocuments() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [pageState, setPageState] = useState({ search: "", page: 1 });
   const page = pageState.search === debouncedSearchTerm ? pageState.page : 1;
@@ -55,9 +59,47 @@ export default function ManageDocuments() {
     return "";
   };
 
+  const handleExcelExport = async () => {
+    if (!docData?.data.length || isLoading || isError || isExportingExcel) return;
+    setIsExportingExcel(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      await downloadExcel(`unishare-documents-page-${page}-${today}.xlsx`, [{
+        name: "Tài liệu",
+        headers: ["Tiêu đề", "Môn học", "Người đăng", "Trạng thái", "Lượt tải", "Lượt xem", "Ngày đăng"],
+        rows: docData.data.map((doc) => [
+          doc.title,
+          doc.subject?.name ?? "",
+          doc.uploader?.fullName ?? "",
+          doc.status,
+          doc.downloadCount ?? 0,
+          doc.viewCount ?? 0,
+          doc.uploadDate ? new Date(doc.uploadDate) : null,
+        ]),
+        widths: [42, 28, 28, 17, 16, 16, 20],
+        formats: { 5: "#,##0", 6: "#,##0", 7: "dd/mm/yyyy" },
+      }]);
+    } catch {
+      toast.error("Không thể xuất file Excel. Vui lòng thử lại.");
+    } finally {
+      setIsExportingExcel(false);
+    }
+  };
+
   return (
     <div>
-      <h3 className="text-xl font-semibold mb-4">Tìm kiếm tài liệu</h3>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-xl font-semibold">Tìm kiếm tài liệu</h3>
+        <button
+          type="button"
+          onClick={handleExcelExport}
+          disabled={!docData?.data.length || isLoading || isError || isExportingExcel}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <ArrowDownTrayIcon className="h-4 w-4" />
+          {isExportingExcel ? "Đang xuất..." : "Xuất Excel trang này"}
+        </button>
+      </div>
       <input
         type="text"
         placeholder="Tìm tài liệu theo tiêu đề..."

@@ -21,6 +21,7 @@ import {
   deleteDocumentFiles,
   resolveUploadPath,
 } from '../common/document-storage';
+import { validateUploadedDocument } from './validate-uploaded-document';
 
 const escapeRegex = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -97,6 +98,7 @@ export class DocumentsService {
     file: Express.Multer.File,
     uploaderId: string,
   ): Promise<Document> {
+    await validateUploadedDocument(file);
     const baseUrl = this.configService.get<string>('API_URL');
     const relativePath = file.path;
     const fullFileUrl = `${baseUrl}/${relativePath.replace(/\\/g, '/')}`;

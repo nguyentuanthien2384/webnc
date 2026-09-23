@@ -5,6 +5,8 @@ import UploadsOverTimeChart from "@/components/statistics/UploadsOverTimeChart";
 import { usePlatformStats } from "@/hooks/usePlatformStats";
 import { useUploadsOverTime } from "@/hooks/useUploadsOverTime";
 import { downloadCsv } from "@/lib/downloadCsv";
+import { downloadExcel } from "@/lib/downloadExcel";
+import { toast } from "react-hot-toast";
 import {
   CloudArrowUpIcon,
   ArrowDownTrayIcon,
@@ -43,10 +45,12 @@ function StatCard({
 function StatisticsPageContent() {
   const { data: stats, isLoading } = usePlatformStats();
   const [days, setDays] = useState(30);
-  const { data: uploads = [] } = useUploadsOverTime(days);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const { data: uploads = [], isLoading: uploadsLoading, isError: uploadsError } = useUploadsOverTime(days);
+  const canExport = !!stats && !uploadsLoading && !uploadsError;
 
   const handleExport = () => {
-    if (!stats) return;
+    if (!canExport || !stats) return;
     const today = new Date().toISOString().slice(0, 10);
     downloadCsv(
       `unishare-statistics-${today}.csv`,
@@ -59,6 +63,40 @@ function StatisticsPageContent() {
         ...uploads.map((item) => ["Tải lên theo ngày", item.date, item.count]),
       ],
     );
+  };
+
+  const handleExcelExport = async () => {
+    if (!canExport || !stats || isExportingExcel) return;
+    setIsExportingExcel(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      await downloadExcel(`unishare-statistics-${days}d-${today}.xlsx`, [
+        {
+          name: "Tổng quan",
+          headers: ["Chỉ số", "Giá trị"],
+          rows: [
+            ["Tổng tài liệu", stats.totalUploads],
+            ["Tổng lượt tải", stats.totalDownloads],
+            ["Người dùng hoạt động", stats.activeUsers],
+            ["Trung bình lượt tải / tài liệu", stats.avgDlPerDoc],
+            ["Khoảng thời gian tải lên (ngày)", days],
+          ],
+          widths: [38, 18],
+          formats: { 2: "#,##0.##" },
+        },
+        {
+          name: `Tải lên ${days} ngày`,
+          headers: ["Ngày", "Số tài liệu tải lên"],
+          rows: uploads.map((item) => [new Date(`${item.date}T00:00:00`), item.count]),
+          widths: [20, 24],
+          formats: { 1: "dd/mm/yyyy", 2: "#,##0" },
+        },
+      ]);
+    } catch {
+      toast.error("Không thể xuất file Excel. Vui lòng thử lại.");
+    } finally {
+      setIsExportingExcel(false);
+    }
   };
 
   if (isLoading) {
@@ -87,14 +125,26 @@ function StatisticsPageContent() {
             <h1 className="text-3xl font-bold text-gray-900">Thống kê hệ thống</h1>
             <p className="mt-1 text-gray-500">Phân tích và thống kê hoạt động nền tảng</p>
           </div>
-          <button
-            type="button"
-            onClick={handleExport}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
-          >
-            <ArrowDownTrayIcon className="h-4 w-4" />
-            Xuất CSV
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handleExport}
+              disabled={!canExport}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              Xuất CSV
+            </button>
+            <button
+              type="button"
+              onClick={handleExcelExport}
+              disabled={!canExport || isExportingExcel}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              {isExportingExcel ? "Đang xuất Excel..." : "Xuất Excel"}
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}

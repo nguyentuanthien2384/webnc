@@ -19,11 +19,14 @@ import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "next/navigation";
 import Pagination from "@/components/common/Pagination";
+import { downloadExcel } from "@/lib/downloadExcel";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 function ManageUsersContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [sortBy, setSortBy] = useState("joinedDate");
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [pageState, setPageState] = useState({ key: "", page: 1 });
   const filterKey = JSON.stringify([debouncedSearchTerm, roleFilter, sortBy]);
@@ -93,6 +96,33 @@ function ManageUsersContent() {
     setModalState(null);
   };
 
+  const handleExcelExport = async () => {
+    if (!usersData?.data.length || isLoading || isError || isExportingExcel) return;
+    setIsExportingExcel(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      await downloadExcel(`unishare-users-page-${page}-${today}.xlsx`, [{
+        name: "Người dùng",
+        headers: ["Họ tên", "Email", "Vai trò", "Trạng thái", "Số tài liệu", "Lượt tải", "Ngày tham gia"],
+        rows: usersData.data.map((user) => [
+          user.fullName,
+          user.email,
+          user.role,
+          user.status,
+          user.uploadsCount ?? 0,
+          user.downloadsCount ?? 0,
+          user.joinedDate ? new Date(user.joinedDate) : null,
+        ]),
+        widths: [28, 34, 17, 17, 16, 16, 20],
+        formats: { 5: "#,##0", 6: "#,##0", 7: "dd/mm/yyyy" },
+      }]);
+    } catch {
+      toast.error("Không thể xuất file Excel. Vui lòng thử lại.");
+    } finally {
+      setIsExportingExcel(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -123,6 +153,15 @@ function ManageUsersContent() {
           <option value="uploadsCount">Số uploads</option>
           <option value="fullName">Tên</option>
         </select>
+        <button
+          type="button"
+          onClick={handleExcelExport}
+          disabled={!usersData?.data.length || isLoading || isError || isExportingExcel}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <ArrowDownTrayIcon className="h-4 w-4" />
+          {isExportingExcel ? "Đang xuất..." : "Xuất Excel trang này"}
+        </button>
       </div>
 
       <div className="overflow-x-auto border rounded-lg">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   ArrowTopRightOnSquareIcon,
   DocumentIcon,
@@ -19,6 +20,15 @@ const isPdf = (fileType?: string) => fileType?.toLowerCase().includes("pdf");
 const isDocx = (fileType?: string) =>
   fileType?.toLowerCase().includes("wordprocessingml.document") ||
   fileType?.toLowerCase().includes("docx");
+
+const PdfPreview = dynamic(() => import("./PdfPreview"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-72 items-center justify-center bg-gray-100 text-sm text-gray-500">
+      Đang tải trình xem PDF…
+    </div>
+  ),
+});
 
 export default function DocumentPreview({
   documentId,
@@ -89,13 +99,7 @@ export default function DocumentPreview({
       </div>
 
       {isPdf(fileType) ? (
-        <div className="h-[700px] w-full bg-gray-100">
-          <iframe
-            src={previewUrl}
-            className="h-full w-full border-0"
-            title="Xem trước tài liệu PDF"
-          />
-        </div>
+        <PdfPreview key={documentId} url={previewUrl} />
       ) : isDocx(fileType) ? (
         <div className="min-h-[360px] bg-gray-100 p-4 sm:p-6">
           {docxStatus === "loading" && (

@@ -281,6 +281,23 @@ describe('UniShare API with isolated MongoDB', () => {
       .expect(400);
   });
 
+  it('rejects a PDF filename with non-PDF contents and removes the upload', async () => {
+    const before = new Set(await readdir('uploads'));
+    await request(app.getHttpServer())
+      .post('/api/documents/upload')
+      .auth(token, { type: 'bearer' })
+      .field('title', 'Spoofed PDF')
+      .field('subject', String(subjectId))
+      .attach('file', Buffer.from('<html>not a PDF</html>'), {
+        filename: 'spoofed.pdf',
+        contentType: 'application/pdf',
+      })
+      .expect(400);
+    expect(
+      (await readdir('uploads')).filter((name) => !before.has(name)),
+    ).toEqual([]);
+  });
+
   it('removes a file when metadata validation fails', async () => {
     const before = new Set(await readdir('uploads'));
     await request(app.getHttpServer())

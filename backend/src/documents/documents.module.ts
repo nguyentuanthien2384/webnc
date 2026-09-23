@@ -10,6 +10,7 @@ import { LogsModule } from '../logs/logs.module';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { randomBytes } from 'crypto';
+import { hasAllowedDocumentNameAndMime } from './validate-uploaded-document';
 
 @Module({
   imports: [
@@ -28,22 +29,12 @@ import { randomBytes } from 'crypto';
         }),
         limits: { fileSize: 100 * 1024 * 1024 },
         fileFilter: (_req, file, callback) => {
-          const allowedMimes = [
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          ];
-          if (
-            allowedMimes.includes(file.mimetype) &&
-            ['.pdf', '.doc', '.docx'].includes(
-              extname(file.originalname).toLowerCase(),
-            )
-          ) {
+          if (hasAllowedDocumentNameAndMime(file)) {
             callback(null, true);
           } else {
             callback(
               new BadRequestException(
-                'Chỉ cho phép upload file .pdf, .doc hoặc .docx',
+                'Chỉ cho phép upload file PDF, DOC hoặc DOCX đúng định dạng',
               ),
               false,
             );

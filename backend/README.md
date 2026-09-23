@@ -23,6 +23,8 @@ Mặc định API ở `http://localhost:8000/api`. Để tạo quản trị viê
 
 Tệp tài liệu không được phục vụ trực tiếp qua `/uploads`. Truy cập qua các endpoint `/api/documents/:id/preview`, `/download` và `/thumbnail` để kiểm tra trạng thái tài liệu và quyền truy cập. Nếu đang dùng dữ liệu cũ với URL thumbnail dạng `/uploads/thumbnails/...`, chạy `npm run generate:thumbnails` một lần sau khi sao lưu dữ liệu để chuyển sang URL mới và tạo các ảnh còn thiếu.
 
+Khi tải tài liệu lên, API giới hạn 100 MB mỗi tệp và đối chiếu phần mở rộng, MIME cùng dấu hiệu định dạng trong nội dung tệp trước khi lưu bản ghi. PDF và DOCX được nhận diện bằng `file-type`; tệp DOC cũ được kiểm tra dấu hiệu CFBF. Tệp không hợp lệ bị từ chối và tệp tạm được dọn khỏi ổ đĩa.
+
 ## Gửi email khôi phục mật khẩu
 
 Đặt `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM` và nếu máy chủ yêu cầu xác thực, đặt thêm `SMTP_USER` cùng `SMTP_PASSWORD` trong `backend/.env`. Cổng 465 dùng TLS trực tiếp; các cổng khác mặc định yêu cầu STARTTLS (`SMTP_REQUIRE_TLS=true`). `FRONTEND_URL` phải trỏ đến giao diện mà người dùng mở được. Không đặt thông tin SMTP vào `frontend/.env.local` và không commit mật khẩu.

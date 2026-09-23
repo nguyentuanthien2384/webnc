@@ -341,8 +341,8 @@ describe('AdminService', () => {
 
       const result = await service.resetPassword('userId123', 'adminId');
 
-      // randomBytes(4).toString('hex') => 8 ký tự hex.
-      expect(result.newPassword).toMatch(/^[0-9a-f]{8}$/);
+      // 12 random bytes encoded as base64url => 16 characters.
+      expect(result.newPassword).toMatch(/^[A-Za-z0-9_-]{16}$/);
       // Mật khẩu lưu xuống DB phải là hash, không phải plaintext.
       expect(userWithSave.password).not.toBe(result.newPassword);
       expect(userWithSave.save).toHaveBeenCalled();
@@ -615,7 +615,7 @@ describe('AdminService', () => {
 
       expect(documentModel.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          $or: [{ title: { $regex: 'test', $options: 'i' } }],
+          title: { $regex: 'test', $options: 'i' },
         }),
       );
     });

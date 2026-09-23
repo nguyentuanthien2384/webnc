@@ -23,4 +23,7 @@ export class Report extends Document {
 }
 
 export const ReportSchema = SchemaFactory.createForClass(Report);
-ReportSchema.index({ document: 1, reporter: 1 }, { unique: true, partialFilterExpression: { status: 'OPEN' } });
+ReportSchema.index(
+  { document: 1, reporter: 1 },
+  { unique: true, partialFilterExpression: { status: 'OPEN' } },
+);

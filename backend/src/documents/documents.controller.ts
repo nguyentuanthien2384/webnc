@@ -26,6 +26,7 @@ import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { Types } from 'mongoose';
 import { extname } from 'path';
+import { CleanupFailedUploadInterceptor } from './cleanup-failed-upload.interceptor';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: { userId: string; email: string; role: string };
@@ -60,7 +61,7 @@ export class DocumentsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file'), CleanupFailedUploadInterceptor)
   uploadDocument(
     @Request() req: AuthenticatedRequest,
     @Body() uploadDocumentDto: UploadDocumentDto,
@@ -144,6 +145,18 @@ export class DocumentsController {
     setFileHeaders(res, doc, 'inline');
 
     return streamableFile;
+  }
+
+  @Get(':id/thumbnail')
+  async thumbnail(
+    @Param('id') docId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    if (!Types.ObjectId.isValid(docId))
+      throw new BadRequestException('Invalid document ID format');
+    const file = await this.documentsService.thumbnail(docId);
+    res.set('Content-Type', 'image/png');
+    return file;
   }
 
   @Get(':id')

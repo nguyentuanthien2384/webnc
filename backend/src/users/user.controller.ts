@@ -14,6 +14,7 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import { Request as ExpressRequest } from 'express';
 
 interface AuthenticatedRequest extends ExpressRequest {
@@ -46,9 +47,9 @@ export class UsersController {
   @Delete('me/account')
   deleteMyAccount(
     @Request() req: AuthenticatedRequest,
-    @Body('password') password: string,
+    @Body() dto: DeleteAccountDto,
   ) {
-    return this.usersService.deleteOwnAccount(req.user.userId, password);
+    return this.usersService.deleteOwnAccount(req.user.userId, dto.password);
   }
 
   @UseGuards(AuthGuard('jwt'))

@@ -6,7 +6,9 @@ const logger = new Logger('DocumentStorage');
 
 function isWithin(root: string, target: string): boolean {
   const path = relative(root, target);
-  return !!path && !isAbsolute(path) && path !== '..' && !path.startsWith(`..${sep}`);
+  return (
+    !!path && !isAbsolute(path) && path !== '..' && !path.startsWith(`..${sep}`)
+  );
 }
 
 /** Only allow paths beneath this application's uploads directory. */
@@ -21,8 +23,12 @@ export async function deleteDocumentFiles(doc: {
   filePath?: string;
   fileUrl?: string;
   thumbnailUrl?: string;
+  thumbnailPath?: string;
 }): Promise<void> {
-  for (const value of new Set([doc.filePath || doc.fileUrl, doc.thumbnailUrl])) {
+  for (const value of new Set([
+    doc.filePath || doc.fileUrl,
+    doc.thumbnailPath || doc.thumbnailUrl,
+  ])) {
     const target = resolveUploadPath(value);
     if (!target) continue;
     try {

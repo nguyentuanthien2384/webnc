@@ -7,12 +7,12 @@ export type { Subject, Major };
 
 interface AdminUsersResponse {
   data: User[];
-  pagination: { total: number };
+  pagination: { total: number; page: number; totalPages: number };
 }
 
 interface AdminDocumentsResponse {
   data: DocType[];
-  pagination: { total: number };
+  pagination: { total: number; page: number; totalPages: number };
 }
 
 export const useAdminSubjects = () => {
@@ -33,42 +33,49 @@ export const useAdminMajors = () => {
   return { data: majors, isLoading: false };
 };
 
-export const useAdminDocuments = (search: string) => {
+export const useAdminDocuments = (search: string, page = 1) => {
   const documents = useAdminStore((s) => s.documents);
   const fetchDocuments = useAdminStore((s) => s.fetchDocuments);
+  const pagination = useAdminStore((s) => s.documentsPagination);
+  const isLoading = useAdminStore((s) => s.documentsLoading);
+  const isError = useAdminStore((s) => s.documentsError);
 
   useEffect(() => {
-    fetchDocuments(search);
-  }, [search, fetchDocuments]);
+    void fetchDocuments(search, page).catch(() => undefined);
+  }, [search, page, fetchDocuments]);
 
   const result: AdminDocumentsResponse = useMemo(
     () => ({
       data: documents,
-      pagination: { total: documents.length },
+      pagination,
     }),
-    [documents],
+    [documents, pagination],
   );
-  return { data: result, isLoading: false };
+  return { data: result, isLoading, isError };
 };
 
 export const useAdminUsers = (
   search: string,
   role?: string,
   sortBy?: string,
+  page = 1,
 ) => {
   const users = useAdminStore((s) => s.users);
   const fetchUsers = useAdminStore((s) => s.fetchUsers);
+  const pagination = useAdminStore((s) => s.usersPagination);
+  const isLoading = useAdminStore((s) => s.usersLoading);
+  const isError = useAdminStore((s) => s.usersError);
 
   useEffect(() => {
-    fetchUsers(search, role, sortBy);
-  }, [search, role, sortBy, fetchUsers]);
+    void fetchUsers(search, role, sortBy, page).catch(() => undefined);
+  }, [search, role, sortBy, page, fetchUsers]);
 
   const result: AdminUsersResponse = useMemo(
     () => ({
       data: users,
-      pagination: { total: users.length },
+      pagination,
     }),
-    [users],
+    [users, pagination],
   );
-  return { data: result, isLoading: false };
+  return { data: result, isLoading, isError };
 };

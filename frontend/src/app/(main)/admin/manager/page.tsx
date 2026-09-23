@@ -45,7 +45,9 @@ export default function ManagePage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900">Quản lý hệ thống</h1>
             <p className="mt-1 text-gray-500">
-              Quản lý môn học, ngành học, tài liệu{isAdmin ? ", người dùng và logs" : " và tài liệu"}
+              {isAdmin
+                ? "Quản lý môn học, ngành học, tài liệu, người dùng, báo cáo và logs"
+                : "Quản lý tài liệu, người dùng và báo cáo"}
             </p>
           </div>
 

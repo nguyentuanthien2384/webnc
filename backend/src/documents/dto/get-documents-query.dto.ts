@@ -8,6 +8,7 @@ import {
   IsDateString,
   Max,
   IsMongoId,
+  MaxLength,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
@@ -28,6 +29,7 @@ export class GetDocumentsQueryDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   search?: string;
 
   @IsOptional()
@@ -37,7 +39,7 @@ export class GetDocumentsQueryDto {
 
   @IsOptional()
   @IsArray()
-  @Transform(({ value }) =>
+  @Transform(({ value }: { value: unknown }) =>
     Array.isArray(value) ? value : value == null ? value : [value],
   )
   @IsMongoId({ each: true })

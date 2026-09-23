@@ -11,13 +11,16 @@ import { Document, DocumentStatus } from './schemas/document.schema';
 import { UploadDocumentDto } from './dto/upload-document.dto';
 import { UsersService } from '../users/users.service';
 import { createReadStream, existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { join, relative } from 'path';
 import { GetDocumentsQueryDto } from './dto/get-documents-query.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { StatisticsService } from '../statistics/statistics.service';
 import { LogsService } from '../logs/logs.service';
 import { ConfigService } from '@nestjs/config';
-import { deleteDocumentFiles, resolveUploadPath } from '../common/document-storage';
+import {
+  deleteDocumentFiles,
+  resolveUploadPath,
+} from '../common/document-storage';
 
 const escapeRegex = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -80,8 +83,7 @@ export class DocumentsService {
       });
 
       if (pages.length > 0 && pages[0].path) {
-        const baseUrl = this.configService.get<string>('API_URL');
-        return `${baseUrl}/uploads/thumbnails/${pngFileName}`;
+        return join(this.thumbnailRelDir, pngFileName);
       }
       return null;
     } catch (error) {
@@ -99,13 +101,15 @@ export class DocumentsService {
     const relativePath = file.path;
     const fullFileUrl = `${baseUrl}/${relativePath.replace(/\\/g, '/')}`;
 
-    let thumbnailUrl: string | null = null;
+    let thumbnailPath: string | null = null;
     if (file.mimetype === 'application/pdf') {
       const thumbName = file.filename.replace(/\.[^.]+$/, '');
-      thumbnailUrl = await this.generateThumbnail(file.path, thumbName);
+      thumbnailPath = await this.generateThumbnail(file.path, thumbName);
     }
 
+    const documentId = new Types.ObjectId();
     const documentData = new this.documentModel({
+      _id: documentId,
       ...uploadDocumentDto,
       fileUrl: fullFileUrl,
       filePath: file.path,
@@ -113,10 +117,14 @@ export class DocumentsService {
       fileType: file.mimetype,
       fileSize: file.size,
       uploader: uploaderId,
-      ...(thumbnailUrl && { thumbnailUrl }),
+      ...(thumbnailPath && {
+        thumbnailPath,
+        thumbnailUrl: `${baseUrl}/api/documents/${documentId.toHexString()}/thumbnail`,
+      }),
     });
 
     const savedDocument = await documentData.save();
+    (file as Express.Multer.File & { persisted?: boolean }).persisted = true;
 
     await savedDocument.populate([
       { path: 'subject', select: 'name code' },
@@ -207,6 +215,20 @@ export class DocumentsService {
     } catch {
       throw new NotFoundException('File not found on server storage.');
     }
+  }
+
+  async thumbnail(docId: string): Promise<StreamableFile> {
+    const doc = await this.documentModel.findById(docId);
+    if (!doc || doc.status !== DocumentStatus.VISIBLE) {
+      throw new NotFoundException('Document not found');
+    }
+    const thumbnailPath = resolveUploadPath(
+      doc.thumbnailPath || doc.thumbnailUrl,
+    );
+    if (!thumbnailPath || !existsSync(thumbnailPath)) {
+      throw new NotFoundException('Thumbnail not found');
+    }
+    return new StreamableFile(createReadStream(thumbnailPath));
   }
 
   async findAll(queryDto: GetDocumentsQueryDto) {
@@ -416,10 +438,20 @@ export class DocumentsService {
 
     const calendarFilters: Record<string, unknown>[] = [];
     if (queryDto.year) {
-      calendarFilters.push({ $eq: [{ $year: { date: '$uploadDate', timezone: 'Asia/Ho_Chi_Minh' } }, queryDto.year] });
+      calendarFilters.push({
+        $eq: [
+          { $year: { date: '$uploadDate', timezone: 'Asia/Ho_Chi_Minh' } },
+          queryDto.year,
+        ],
+      });
     }
     if (queryDto.month) {
-      calendarFilters.push({ $eq: [{ $month: { date: '$uploadDate', timezone: 'Asia/Ho_Chi_Minh' } }, queryDto.month] });
+      calendarFilters.push({
+        $eq: [
+          { $month: { date: '$uploadDate', timezone: 'Asia/Ho_Chi_Minh' } },
+          queryDto.month,
+        ],
+      });
     }
     if (calendarFilters.length) query.$expr = { $and: calendarFilters };
 
@@ -427,7 +459,9 @@ export class DocumentsService {
       query.title = { $regex: escapeRegex(search.trim()), $options: 'i' };
     }
 
-    const sortField = ['downloads', 'downloadCount'].includes(sortBy) ? 'downloadCount' : 'uploadDate';
+    const sortField = ['downloads', 'downloadCount'].includes(sortBy)
+      ? 'downloadCount'
+      : 'uploadDate';
     const sortOrderValue = sortOrder === 'asc' ? 1 : -1;
     const sortOptions: Record<string, 1 | -1> = {
       [sortField]: sortOrderValue,
@@ -474,7 +508,9 @@ export class DocumentsService {
       query.title = { $regex: escapeRegex(search.trim()), $options: 'i' };
     }
 
-    const sortField = ['downloads', 'downloadCount'].includes(sortBy) ? 'downloadCount' : 'uploadDate';
+    const sortField = ['downloads', 'downloadCount'].includes(sortBy)
+      ? 'downloadCount'
+      : 'uploadDate';
     const sortOrderValue = sortOrder === 'asc' ? 1 : -1;
     const sortOptions: Record<string, 1 | -1> = {
       [sortField]: sortOrderValue,
@@ -514,6 +550,7 @@ export class DocumentsService {
         { thumbnailUrl: { $exists: false } },
         { thumbnailUrl: null },
         { thumbnailUrl: '' },
+        { thumbnailUrl: /\/uploads\/thumbnails\// },
       ],
       fileType: 'application/pdf',
     });
@@ -522,6 +559,17 @@ export class DocumentsService {
     let failed = 0;
 
     for (const doc of docs) {
+      const legacyThumbnail = resolveUploadPath(doc.thumbnailUrl);
+      if (legacyThumbnail && existsSync(legacyThumbnail)) {
+        doc.thumbnailPath = relative(process.cwd(), legacyThumbnail).replace(
+          /\\/g,
+          '/',
+        );
+        doc.thumbnailUrl = `${this.configService.get<string>('API_URL')}/api/documents/${String(doc._id)}/thumbnail`;
+        await doc.save();
+        success++;
+        continue;
+      }
       const filePath = (doc as unknown as Record<string, string>).filePath;
       if (!filePath) {
         failed++;
@@ -529,10 +577,11 @@ export class DocumentsService {
       }
 
       const fileName = filePath.replace(/^.*[/\\]/, '').replace(/\.[^.]+$/, '');
-      const thumbnailUrl = await this.generateThumbnail(filePath, fileName);
+      const thumbnailPath = await this.generateThumbnail(filePath, fileName);
 
-      if (thumbnailUrl) {
-        doc.thumbnailUrl = thumbnailUrl;
+      if (thumbnailPath) {
+        doc.thumbnailPath = thumbnailPath;
+        doc.thumbnailUrl = `${this.configService.get<string>('API_URL')}/api/documents/${String(doc._id)}/thumbnail`;
         await doc.save();
         success++;
       } else {

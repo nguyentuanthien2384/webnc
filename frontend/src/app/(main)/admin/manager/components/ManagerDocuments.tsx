@@ -10,14 +10,17 @@ import {
 import { Document as DocType } from "@/@types/document.type";
 import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import { useAuthStore } from "@/store/auth.store"; // Import để kiểm tra quyền Admin
+import Pagination from "@/components/common/Pagination";
 
 export default function ManageDocuments() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [pageState, setPageState] = useState({ search: "", page: 1 });
+  const page = pageState.search === debouncedSearchTerm ? pageState.page : 1;
   const { user } = useAuthStore(); // Lấy user hiện tại
   const isAdmin = user?.role === "ADMIN";
 
-  const { data: docData, isLoading } = useAdminDocuments(debouncedSearchTerm);
+  const { data: docData, isLoading, isError } = useAdminDocuments(debouncedSearchTerm, page);
 
   // Mutations
   const blockMutation = useBlockDocument();
@@ -147,6 +150,9 @@ export default function ManageDocuments() {
           </tbody>
         </table>
       </div>
+
+      {isError && <p role="alert" className="mt-3 text-red-600">Không thể tải danh sách tài liệu.</p>}
+      <Pagination page={page} totalPages={docData?.pagination.totalPages ?? 0} onPageChange={(page) => setPageState({ search: debouncedSearchTerm, page })} />
 
       {/* Modal xác nhận */}
       <DeleteConfirmModal

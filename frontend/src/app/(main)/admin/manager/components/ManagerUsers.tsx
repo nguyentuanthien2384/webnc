@@ -18,22 +18,27 @@ import { getApiErrorMessage } from "@/lib/apiError";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "next/navigation";
+import Pagination from "@/components/common/Pagination";
 
 function ManageUsersContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [sortBy, setSortBy] = useState("joinedDate");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [pageState, setPageState] = useState({ key: "", page: 1 });
+  const filterKey = JSON.stringify([debouncedSearchTerm, roleFilter, sortBy]);
+  const page = pageState.key === filterKey ? pageState.page : 1;
   const queryClient = useQueryClient();
-  const logout = useAuthStore((s) => s.logout);
+  const logout = useAuthStore((s) => s.clearSession);
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
   const isAdmin = currentUser?.role === "ADMIN";
 
-  const { data: usersData, isLoading } = useAdminUsers(
+  const { data: usersData, isLoading, isError } = useAdminUsers(
     debouncedSearchTerm,
     roleFilter,
     sortBy,
+    page,
   );
 
   const roleMutation = useUpdateUserRole();
@@ -283,6 +288,9 @@ function ManageUsersContent() {
           </tbody>
         </table>
       </div>
+
+      {isError && <p role="alert" className="mt-3 text-red-600">Không thể tải danh sách người dùng.</p>}
+      <Pagination page={page} totalPages={usersData?.pagination.totalPages ?? 0} onPageChange={(page) => setPageState({ key: filterKey, page })} />
 
       <DeleteConfirmModal
         isOpen={!!modalState}

@@ -58,6 +58,9 @@ export class Document extends mongoose.Document {
   @Prop()
   thumbnailUrl: string;
 
+  @Prop()
+  thumbnailPath: string;
+
   @Prop({ default: 0 })
   downloadCount: number;
 

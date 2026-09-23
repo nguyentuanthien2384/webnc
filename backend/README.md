@@ -1,210 +1,36 @@
-# UniShare Backend
+# UniShare API
 
-Backend API cho ứng dụng chia sẻ tài liệu học tập UniShare, xây dựng bằng NestJS + MongoDB.
+API NestJS + MongoDB cho ứng dụng chia sẻ tài liệu học tập. Chạy các lệnh dưới đây trong thư mục `backend`.
 
-## Yêu cầu hệ thống
+## Thiết lập
 
-- **Node.js** >= 18
-- **MongoDB** >= 6.0 (local hoặc Atlas)
-- **npm** >= 9
-
-## Cài đặt
+Yêu cầu Node.js 20+, npm và MongoDB. Sao chép `.env.example` thành `.env`, rồi đặt `DATABASE_URL` và `JWT_SECRET` riêng cho môi trường của bạn. `API_URL` là địa chỉ công khai của backend; `FRONTEND_URL` là nguồn giao diện được phép truy cập API (có thể ghi nhiều URL, ngăn cách bằng dấu phẩy). Không đưa `.env` lên Git.
 
 ```bash
-# 1. Clone repository
-git clone <repo-url>
-cd UniShare-BE-main
-
-# 2. Cài dependencies
 npm install
-
-# 3. Tạo file .env
-cp .env.example .env
+npm run start:dev
 ```
 
-## Cấu hình (.env)
+Mặc định API ở `http://localhost:8000/api`. Để tạo quản trị viên lần đầu, đặt `ADMIN_PASSWORD` mạnh, dài ít nhất 12 ký tự trong `.env`, rồi chạy `npm run seed:admin`. Script không thay đổi mật khẩu của tài khoản đã tồn tại; nếu từng dùng mật khẩu mẫu cũ, hãy đổi mật khẩu đó trước khi triển khai.
 
-Tạo file `.env` ở thư mục gốc với nội dung:
+## Chức năng
 
-```env
-PORT=8000
-DATABASE_URL=mongodb://127.0.0.1:27017/unishare
-JWT_SECRET=your_jwt_secret_key_here
-API_URL=http://localhost:8000
-```
+- Đăng ký bằng email sinh viên Phenikaa, đăng nhập JWT, đăng xuất thu hồi token, đổi mật khẩu, sửa/xóa tài khoản.
+- Tải lên, tìm kiếm, lọc và phân trang tài liệu; xem trước, tải xuống, chỉnh sửa và xóa tài liệu theo quyền sở hữu.
+- Báo cáo tài liệu; quản trị viên/điều hành viên xem và xử lý báo cáo.
+- Quản trị người dùng, tài liệu, môn/ngành học; thống kê và nhật ký hoạt động.
 
-## Chạy ứng dụng
+Tệp tài liệu không được phục vụ trực tiếp qua `/uploads`. Truy cập qua các endpoint `/api/documents/:id/preview`, `/download` và `/thumbnail` để kiểm tra trạng thái tài liệu và quyền truy cập. Nếu đang dùng dữ liệu cũ với URL thumbnail dạng `/uploads/thumbnails/...`, chạy `npm run generate:thumbnails` một lần sau khi sao lưu dữ liệu để chuyển sang URL mới và tạo các ảnh còn thiếu.
+
+`POST /api/auth/forgot-password` không tự đặt lại mật khẩu: hiện chưa tích hợp email xác minh nên người dùng cần liên hệ quản trị viên. Endpoint trả cùng một thông báo cho email có hoặc không có tài khoản. Quản trị viên có thể dùng chức năng đặt lại mật khẩu trong trang quản trị.
+
+## Kiểm tra
 
 ```bash
-# Development (auto-reload)
-npm run start:dev
-
-# Production
+npm run lint
+npm test -- --runInBand
+npm run test:e2e -- --runInBand
 npm run build
-npm run start:prod
 ```
 
-Server chạy tại: `http://localhost:8000`
-API prefix: `/api`
-
-## Seed dữ liệu
-
-```bash
-# Tạo tài khoản Admin mặc định
-npm run seed:admin
-```
-
-Thông tin admin mặc định:
-- Email: `admin@unishare.com`
-- Password: `admin123`
-
-## Cấu trúc thư mục
-
-```
-src/
-├── auth/           # Đăng ký, đăng nhập, JWT strategy
-├── users/          # Quản lý profile, đổi mật khẩu
-├── documents/      # Upload, download, CRUD tài liệu
-├── categories/     # API công khai lấy danh sách môn/ngành
-├── admin/          # CRUD users, documents, subjects, majors (Admin/Mod)
-├── statistics/     # Thống kê nền tảng
-├── logs/           # Ghi log hoạt động admin
-├── subjects/       # Schema môn học
-├── majors/         # Schema ngành học
-├── app.module.ts   # Root module
-├── main.ts         # Entry point
-└── create-admin.ts # Script seed admin
-```
-
-## API Endpoints
-
-### Auth (`/api/auth`)
-| Method | Endpoint    | Mô tả           | Auth |
-|--------|-------------|------------------|------|
-| POST   | /register   | Đăng ký          | No   |
-| POST   | /login      | Đăng nhập        | No   |
-| GET    | /me         | Lấy profile      | JWT  |
-
-### Users (`/api/users`)
-| Method | Endpoint          | Mô tả                  | Auth |
-|--------|-------------------|-------------------------|------|
-| GET    | /me/profile       | Profile của mình        | JWT  |
-| PATCH  | /me/profile       | Cập nhật profile        | JWT  |
-| POST   | /me/change-password | Đổi mật khẩu          | JWT  |
-| GET    | /me/stats         | Thống kê của mình       | JWT  |
-| GET    | /profile/:userId  | Profile user khác       | JWT  |
-| GET    | /:userId/stats    | Thống kê user khác      | JWT  |
-
-### Documents (`/api/documents`)
-| Method | Endpoint            | Mô tả                  | Auth |
-|--------|---------------------|-------------------------|------|
-| POST   | /upload             | Upload tài liệu        | JWT  |
-| GET    | /                   | Danh sách tài liệu     | JWT  |
-| GET    | /my-uploads         | Tài liệu của mình      | JWT  |
-| GET    | /user/:userId/uploads | Tài liệu của user khác | JWT |
-| GET    | /:id                | Chi tiết tài liệu      | JWT  |
-| GET    | /:id/download       | Download tài liệu      | JWT  |
-| PATCH  | /:id                | Cập nhật tài liệu      | JWT  |
-| DELETE | /:id                | Xóa tài liệu           | JWT  |
-
-### Categories (`/api/categories`)
-| Method | Endpoint      | Mô tả               | Auth |
-|--------|---------------|----------------------|------|
-| GET    | /subjects     | Danh sách môn học    | JWT  |
-| GET    | /majors       | Danh sách ngành học  | JWT  |
-| GET    | /majors/:id   | Chi tiết ngành học   | JWT  |
-
-### Admin (`/api/admin`) - Yêu cầu role ADMIN hoặc MODERATOR
-| Method | Endpoint                   | Mô tả              | Role          |
-|--------|----------------------------|---------------------|---------------|
-| GET    | /users                     | Danh sách users     | Admin, Mod    |
-| PATCH  | /users/:id/role            | Đổi role user       | Admin         |
-| POST   | /users/:id/reset-password  | Reset mật khẩu      | Admin, Mod    |
-| POST   | /users/:id/block           | Block user          | Admin, Mod    |
-| POST   | /users/:id/unblock         | Unblock user        | Admin, Mod    |
-| DELETE | /users/:id                 | Xóa user            | Admin         |
-| GET    | /documents                 | Danh sách documents | Admin, Mod    |
-| POST   | /documents/:id/block       | Block document      | Admin, Mod    |
-| POST   | /documents/:id/unblock     | Unblock document    | Admin, Mod    |
-| DELETE | /documents/:id             | Xóa document        | Admin         |
-| POST   | /subjects                  | Tạo môn học         | Admin, Mod    |
-| GET    | /subjects                  | Danh sách môn học   | Admin, Mod    |
-| PATCH  | /subjects/:id              | Cập nhật môn học    | Admin, Mod    |
-| DELETE | /subjects/:id              | Xóa môn học         | Admin, Mod    |
-| POST   | /majors                    | Tạo ngành học       | Admin, Mod    |
-| GET    | /majors                    | Danh sách ngành học | Admin, Mod    |
-| PATCH  | /majors/:id                | Cập nhật ngành học  | Admin, Mod    |
-| DELETE | /majors/:id                | Xóa ngành học       | Admin, Mod    |
-
-### Statistics (`/api/statistics`) - Admin/Mod only
-| Method | Endpoint          | Mô tả                    | Role       |
-|--------|-------------------|---------------------------|------------|
-| GET    | /platform         | Thống kê nền tảng         | Admin, Mod |
-| GET    | /uploads-over-time | Biểu đồ upload theo ngày | Admin, Mod |
-
-### Logs (`/api/logs`) - Admin only
-| Method | Endpoint | Mô tả          | Role  |
-|--------|----------|-----------------|-------|
-| GET    | /        | Danh sách logs  | Admin |
-
-## Test thủ công (Flow đầy đủ)
-
-```bash
-# 1. Seed admin
-npm run seed:admin
-
-# 2. Chạy server
-npm run start:dev
-
-# 3. Đăng ký user mới
-curl -X POST http://localhost:8000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@test.com","fullName":"Test User","password":"123456"}'
-
-# 4. Đăng nhập
-curl -X POST http://localhost:8000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@test.com","password":"123456"}'
-# → Lấy accessToken từ response
-
-# 5. Upload tài liệu (thay TOKEN bằng accessToken)
-curl -X POST http://localhost:8000/api/documents/upload \
-  -H "Authorization: Bearer TOKEN" \
-  -F "title=Bài giảng" \
-  -F "subject=SUBJECT_ID" \
-  -F "file=@/path/to/file.pdf"
-
-# 6. Xem danh sách tài liệu
-curl http://localhost:8000/api/documents \
-  -H "Authorization: Bearer TOKEN"
-
-# 7. Đăng nhập admin
-curl -X POST http://localhost:8000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@unishare.com","password":"admin123"}'
-
-# 8. Xem thống kê (dùng admin token)
-curl http://localhost:8000/api/statistics/platform \
-  -H "Authorization: Bearer ADMIN_TOKEN"
-
-# 9. Xem logs
-curl http://localhost:8000/api/logs \
-  -H "Authorization: Bearer ADMIN_TOKEN"
-```
-
-## Validation
-
-- `whitelist: true` — Tự động loại bỏ các field không khai báo trong DTO
-- `forbidNonWhitelisted: true` — Trả lỗi nếu gửi field thừa
-- `transform: true` — Tự động convert type (string → number cho query params)
-
-## Scripts
-
-| Script | Mô tả |
-|--------|-------|
-| `npm run start:dev` | Chạy development mode (auto-reload) |
-| `npm run build` | Build production |
-| `npm run start:prod` | Chạy production |
-| `npm run seed:admin` | Tạo tài khoản admin mặc định |
-| `npm run lint` | Kiểm tra và fix lỗi ESLint |
-| `npm run format` | Format code với Prettier |
+Kiểm thử e2e cần MongoDB và sử dụng cơ sở dữ liệu riêng có tên `unishare_e2e_*`; dữ liệu thử được dọn sau khi chạy. Không trỏ `DATABASE_URL` vào cơ sở dữ liệu sản xuất khi chạy kiểm thử.

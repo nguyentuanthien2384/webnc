@@ -1,36 +1,14 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UniShare giao diện
 
-## Getting Started
+Giao diện Next.js cho UniShare. Chạy các lệnh trong thư mục `frontend` sau khi backend và MongoDB đã hoạt động.
 
-First, run the development server:
+Sao chép `.env.example` thành `.env.local`; điều chỉnh `NEXT_PUBLIC_API_URL` nếu backend không ở `http://localhost:8000/api`.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở `http://localhost:3000`. Để kiểm tra trước khi triển khai, chạy `npm run lint` và `npm run build`. Tài khoản quản trị đầu tiên được tạo ở backend bằng `npm run seed:admin` sau khi đặt `ADMIN_PASSWORD` an toàn.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Giao diện hỗ trợ tìm kiếm/lọc tài liệu, tải nhiều tài liệu với trạng thái từng tệp, trang hồ sơ, báo cáo tài liệu và quản trị có phân trang. Nếu quên mật khẩu, hãy liên hệ quản trị viên; ứng dụng chưa có khôi phục qua email.

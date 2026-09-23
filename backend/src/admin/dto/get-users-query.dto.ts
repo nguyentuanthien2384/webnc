@@ -1,10 +1,19 @@
-import { IsOptional, IsString, IsIn, IsInt, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsIn,
+  IsInt,
+  Min,
+  Max,
+  MaxLength,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserRole } from '../../users/schemas/user.schema';
 
 export class GetUsersQueryDto {
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   search?: string;
 
   @IsOptional()
@@ -39,5 +48,6 @@ export class GetUsersQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(100)
   limit?: number = 10;
 }

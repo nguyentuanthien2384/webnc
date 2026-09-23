@@ -3,6 +3,9 @@ import api from "@/lib/axios";
 import { User } from "@/@types/user.type";
 import { Document as DocType } from "@/@types/document.type";
 
+let usersRequestId = 0;
+let documentsRequestId = 0;
+
 export interface Subject {
   _id: string;
   name: string;
@@ -21,11 +24,19 @@ interface AdminState {
   majors: Major[];
   users: User[];
   documents: DocType[];
+  usersPagination: { total: number; page: number; totalPages: number };
+  documentsPagination: { total: number; page: number; totalPages: number };
+  usersLoading: boolean;
+  documentsLoading: boolean;
+  usersError: boolean;
+  documentsError: boolean;
+  usersQuery: { search?: string; role?: string; sortBy?: string; page: number };
+  documentsQuery: { search?: string; page: number };
 
   fetchSubjects: () => Promise<void>;
   fetchMajors: () => Promise<void>;
-  fetchUsers: (search?: string, role?: string, sortBy?: string) => Promise<void>;
-  fetchDocuments: (search?: string) => Promise<void>;
+  fetchUsers: (search?: string, role?: string, sortBy?: string, page?: number) => Promise<void>;
+  fetchDocuments: (search?: string, page?: number) => Promise<void>;
 
   addSubject: (s: Omit<Subject, "_id">) => Promise<void>;
   updateSubject: (id: string, s: Partial<Subject>) => Promise<void>;
@@ -51,6 +62,14 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   majors: [],
   users: [],
   documents: [],
+  usersPagination: { total: 0, page: 1, totalPages: 0 },
+  documentsPagination: { total: 0, page: 1, totalPages: 0 },
+  usersLoading: false,
+  documentsLoading: false,
+  usersError: false,
+  documentsError: false,
+  usersQuery: { page: 1 },
+  documentsQuery: { page: 1 },
 
   fetchSubjects: async () => {
     const res = await api.get("/admin/subjects");
@@ -60,17 +79,37 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     const res = await api.get("/admin/majors");
     set({ majors: res.data });
   },
-  fetchUsers: async (search?: string, role?: string, sortBy?: string) => {
-    const params: Record<string, unknown> = { limit: 100 };
+  fetchUsers: async (search?: string, role?: string, sortBy?: string, page = 1) => {
+    const requestId = ++usersRequestId;
+    set({ users: [], usersLoading: true, usersError: false, usersQuery: { search, role, sortBy, page } });
+    const params: Record<string, unknown> = { page, limit: 20 };
     if (search) params.search = search;
     if (role) params.role = role;
     if (sortBy) params.sortBy = sortBy;
-    const res = await api.get("/admin/users", { params });
-    set({ users: res.data.data });
+    try {
+      const res = await api.get("/admin/users", { params });
+      if (requestId === usersRequestId) {
+        set({ users: res.data.data, usersPagination: res.data.pagination, usersLoading: false });
+      }
+    } catch (error) {
+      if (requestId !== usersRequestId) return;
+      set({ usersError: true, usersLoading: false });
+      throw error;
+    }
   },
-  fetchDocuments: async (search?: string) => {
-    const res = await api.get("/admin/documents", { params: { search, limit: 100 } });
-    set({ documents: res.data.data });
+  fetchDocuments: async (search?: string, page = 1) => {
+    const requestId = ++documentsRequestId;
+    set({ documents: [], documentsLoading: true, documentsError: false, documentsQuery: { search, page } });
+    try {
+      const res = await api.get("/admin/documents", { params: { search, page, limit: 20 } });
+      if (requestId === documentsRequestId) {
+        set({ documents: res.data.data, documentsPagination: res.data.pagination, documentsLoading: false });
+      }
+    } catch (error) {
+      if (requestId !== documentsRequestId) return;
+      set({ documentsError: true, documentsLoading: false });
+      throw error;
+    }
   },
 
   addSubject: async (s) => {
@@ -101,20 +140,24 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   blockUser: async (id) => {
     await api.post(`/admin/users/${id}/block`);
-    await get().fetchUsers();
+    const q = get().usersQuery;
+    await get().fetchUsers(q.search, q.role, q.sortBy, q.page);
   },
   unblockUser: async (id) => {
     await api.post(`/admin/users/${id}/unblock`);
-    await get().fetchUsers();
+    const q = get().usersQuery;
+    await get().fetchUsers(q.search, q.role, q.sortBy, q.page);
   },
   updateUserRole: async (id, role) => {
     const res = await api.patch(`/admin/users/${id}/role`, { role });
-    await get().fetchUsers();
+    const q = get().usersQuery;
+    await get().fetchUsers(q.search, q.role, q.sortBy, q.page);
     return res.data;
   },
   deleteUser: async (id) => {
     await api.delete(`/admin/users/${id}`);
-    await get().fetchUsers();
+    const q = get().usersQuery;
+    await get().fetchUsers(q.search, q.role, q.sortBy, q.page);
   },
   resetPassword: async (id) => {
     const res = await api.post(`/admin/users/${id}/reset-password`);
@@ -123,14 +166,17 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   blockDocument: async (id) => {
     await api.post(`/admin/documents/${id}/block`);
-    await get().fetchDocuments();
+    const q = get().documentsQuery;
+    await get().fetchDocuments(q.search, q.page);
   },
   unblockDocument: async (id) => {
     await api.post(`/admin/documents/${id}/unblock`);
-    await get().fetchDocuments();
+    const q = get().documentsQuery;
+    await get().fetchDocuments(q.search, q.page);
   },
   deleteDocument: async (id) => {
     await api.delete(`/admin/documents/${id}`);
-    await get().fetchDocuments();
+    const q = get().documentsQuery;
+    await get().fetchDocuments(q.search, q.page);
   },
 }));

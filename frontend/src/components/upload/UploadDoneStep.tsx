@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUploadDocument } from "@/hooks/useUploadDocument";
@@ -15,13 +15,15 @@ export default function UploadDoneStep({ files, metadata }: {
 }) {
   const { mutateAsync } = useUploadDocument();
   const queryClient = useQueryClient();
-  const started = useRef(false);
+  const [started, setStarted] = useState(false);
   const busy = useRef(false);
-  const [results, setResults] = useState<Result[]>(() => files.map(() => ({ status: "uploading" })));
+  const [results, setResults] = useState<Result[]>(() => files.map(() => ({ status: "waiting" })));
 
   const upload = useCallback(async (indices: number[]) => {
     if (busy.current) return;
     busy.current = true;
+    setStarted(true);
+    setResults((old) => old.map((result, index) => indices.includes(index) ? { status: "uploading" } : result));
     // Process sequentially to avoid loading many 100 MB files into memory at once.
     for (const index of indices) {
       let result: Result;
@@ -39,19 +41,13 @@ export default function UploadDoneStep({ files, metadata }: {
     }
   }, [files, metadata, mutateAsync, queryClient]);
 
-  useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    void upload(files.map((_, index) => index));
-  }, [files, upload]);
-
-  const pending = results.some((entry) => ["waiting", "uploading"].includes(entry.status));
+  const pending = results.some((entry) => entry.status === "uploading");
   const failed = results.flatMap((entry, index) => entry.status === "error" ? [index] : []);
   const succeeded = results.filter((entry) => entry.status === "success").length;
 
   return (
     <div aria-live="polite">
-      <h2 className="text-xl font-semibold text-gray-900">{pending ? "Đang tải lên tài liệu…" : "Kết quả tải lên"}</h2>
+      <h2 className="text-xl font-semibold text-gray-900">{!started ? "Sẵn sàng tải lên" : pending ? "Đang tải lên tài liệu…" : "Kết quả tải lên"}</h2>
       <p className="mt-2 text-sm text-gray-500">{succeeded}/{files.length} tệp đã tải lên thành công. {pending && "Vui lòng giữ trang này mở."}</p>
       <ul className="my-6 space-y-3">
         {files.map((file, index) => (
@@ -64,6 +60,7 @@ export default function UploadDoneStep({ files, metadata }: {
         ))}
       </ul>
       {!pending && <div className="flex flex-wrap gap-3">
+        {!started && <button type="button" disabled={files.length === 0} onClick={() => void upload(files.map((_, index) => index))} className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white">Bắt đầu tải lên</button>}
         {failed.length > 0 && <button type="button" onClick={() => {
           setResults((old) => old.map((result, index) => failed.includes(index) ? { status: "uploading" } : result));
           void upload(failed);

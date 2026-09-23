@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
-import { join } from 'path';
+import { join, relative } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { resolveUploadPath } from './common/document-storage';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const DocumentSchema = new mongoose.Schema({
   filePath: String,
   fileType: String,
   thumbnailUrl: String,
+  thumbnailPath: String,
 });
 
 async function generateThumbnails() {
@@ -39,6 +41,7 @@ async function generateThumbnails() {
       { thumbnailUrl: { $exists: false } },
       { thumbnailUrl: null },
       { thumbnailUrl: '' },
+      { thumbnailUrl: /\/uploads\/thumbnails\// },
     ],
     fileType: 'application/pdf',
   });
@@ -51,6 +54,18 @@ async function generateThumbnails() {
   let failed = 0;
 
   for (const doc of docs) {
+    const legacyThumbnail = resolveUploadPath(doc.thumbnailUrl ?? undefined);
+    if (legacyThumbnail && existsSync(legacyThumbnail)) {
+      await Document.findByIdAndUpdate(doc._id, {
+        thumbnailPath: relative(process.cwd(), legacyThumbnail).replace(
+          /\\/g,
+          '/',
+        ),
+        thumbnailUrl: `${apiUrl}/api/documents/${String(doc._id)}/thumbnail`,
+      });
+      success++;
+      continue;
+    }
     const filePath = doc.filePath;
     if (!filePath) {
       console.log(`  [SKIP] "${doc.title}" - no filePath`);
@@ -77,8 +92,12 @@ async function generateThumbnails() {
       });
 
       if (pages.length > 0) {
-        const thumbnailUrl = `${apiUrl}/uploads/thumbnails/${pngFileName}`;
-        await Document.findByIdAndUpdate(doc._id, { thumbnailUrl });
+        const thumbnailPath = `uploads/thumbnails/${pngFileName}`;
+        const thumbnailUrl = `${apiUrl}/api/documents/${String(doc._id)}/thumbnail`;
+        await Document.findByIdAndUpdate(doc._id, {
+          thumbnailUrl,
+          thumbnailPath,
+        });
         console.log(`  [OK] "${doc.title}" -> ${pngFileName}`);
         success++;
       } else {

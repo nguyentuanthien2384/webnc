@@ -15,7 +15,7 @@ import {
 const steps = [
   { id: 1, name: "Chọn file", icon: CloudArrowUpIcon },
   { id: 2, name: "Thông tin", icon: DocumentTextIcon },
-  { id: 3, name: "Hoàn tất", icon: CheckCircleIcon },
+  { id: 3, name: "Tải lên", icon: CheckCircleIcon },
 ];
 
 export default function UploadPage() {

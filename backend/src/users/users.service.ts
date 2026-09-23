@@ -109,7 +109,10 @@ export class UsersService {
   }
 
   async revokeSessions(userId: string): Promise<void> {
-    await this.userModel.updateOne({ _id: userId }, { $inc: { tokenVersion: 1 } });
+    await this.userModel.updateOne(
+      { _id: userId },
+      { $inc: { tokenVersion: 1 } },
+    );
   }
 
   async incrementTotalDownloads(userId: string, amount: number = 1) {
@@ -137,7 +140,10 @@ export class UsersService {
       throw new UnauthorizedException('Mật khẩu không chính xác');
     }
 
-    const files = await this.documentModel.find({ uploader: userId }).select('filePath fileUrl thumbnailUrl').exec();
+    const files = await this.documentModel
+      .find({ uploader: userId })
+      .select('filePath fileUrl thumbnailUrl thumbnailPath')
+      .exec();
     const deletedDocs = await this.documentModel.deleteMany({
       uploader: userId,
     });

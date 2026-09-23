@@ -7,10 +7,13 @@ import { ReportsController } from './reports.controller';
 import { ReportsService } from './reports.service';
 
 @Module({
-  imports: [MongooseModule.forFeature([
-    { name: Report.name, schema: ReportSchema },
-    { name: Document.name, schema: DocumentSchema },
-  ]), LogsModule],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Report.name, schema: ReportSchema },
+      { name: Document.name, schema: DocumentSchema },
+    ]),
+    LogsModule,
+  ],
   controllers: [ReportsController],
   providers: [ReportsService],
 })

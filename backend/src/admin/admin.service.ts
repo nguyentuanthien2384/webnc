@@ -23,6 +23,9 @@ import { randomBytes } from 'crypto';
 import { GetDocumentsQueryDto } from '../documents/dto/get-documents-query.dto';
 import { deleteDocumentFiles } from '../common/document-storage';
 
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 interface UserAggregateResult {
   data: User[];
   total: Array<{ count: number }>;
@@ -186,7 +189,10 @@ export class AdminService {
     if (userId === actorId || user.role === UserRole.ADMIN) {
       throw new ForbiddenException('Không thể xóa tài khoản Admin');
     }
-    const files = await this.documentModel.find({ uploader: userId }).select('filePath fileUrl thumbnailUrl').exec();
+    const files = await this.documentModel
+      .find({ uploader: userId })
+      .select('filePath fileUrl thumbnailUrl thumbnailPath')
+      .exec();
     const deletedDocs = await this.documentModel.deleteMany({
       uploader: userId,
     });
@@ -224,7 +230,10 @@ export class AdminService {
     await doc.deleteOne();
     await deleteDocumentFiles(doc);
     if (doc.uploader) {
-      await this.userModel.updateOne({ _id: doc.uploader._id }, { $inc: { uploadsCount: -1 } });
+      await this.userModel.updateOne(
+        { _id: doc.uploader._id },
+        { $inc: { uploadsCount: -1 } },
+      );
     }
     await this.statisticsService.incrementTotalUploads(-1);
     await this.logsService.createLog(
@@ -290,13 +299,14 @@ export class AdminService {
 
     const skip = (page - 1) * limit;
     const sortValue: 1 | -1 = sortOrder === 'asc' ? 1 : -1;
+    const safeSearch = search ? escapeRegex(search.trim()) : undefined;
 
     if (sortBy === 'totalDocDownloads') {
       const matchStage: Record<string, unknown> = {};
-      if (search) {
+      if (safeSearch) {
         matchStage.$or = [
-          { fullName: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
+          { fullName: { $regex: safeSearch, $options: 'i' } },
+          { email: { $regex: safeSearch, $options: 'i' } },
         ];
       }
       if (role) matchStage.role = role;
@@ -345,10 +355,10 @@ export class AdminService {
 
     const query: Record<string, unknown> = {};
 
-    if (search) {
+    if (safeSearch) {
       query.$or = [
-        { fullName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { fullName: { $regex: safeSearch, $options: 'i' } },
+        { email: { $regex: safeSearch, $options: 'i' } },
       ];
     }
 
@@ -388,7 +398,7 @@ export class AdminService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const newPassword = randomBytes(4).toString('hex');
+    const newPassword = randomBytes(12).toString('base64url');
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
@@ -605,11 +615,13 @@ export class AdminService {
 
     const query: Record<string, unknown> = {};
 
-    if (search) {
-      query.$or = [{ title: { $regex: search, $options: 'i' } }];
+    if (search?.trim()) {
+      query.title = { $regex: escapeRegex(search.trim()), $options: 'i' };
     }
 
-    const sortField = ['downloads', 'downloadCount'].includes(sortBy) ? 'downloadCount' : 'uploadDate';
+    const sortField = ['downloads', 'downloadCount'].includes(sortBy)
+      ? 'downloadCount'
+      : 'uploadDate';
     const sortOrderValue = sortOrder === 'asc' ? 1 : -1;
     const sortOptions: Record<string, 1 | -1> = {
       [sortField]: sortOrderValue,

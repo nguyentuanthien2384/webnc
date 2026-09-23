@@ -14,7 +14,6 @@ import { User, UserStatus } from '../users/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
-
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -75,7 +74,12 @@ export class AuthService {
       throw new UnauthorizedException('Mật khẩu không chính xác.');
     }
 
-    const payload = { sub: user._id, email: user.email, role: user.role, tokenVersion: user.tokenVersion ?? 0 };
+    const payload = {
+      sub: user._id,
+      email: user.email,
+      role: user.role,
+      tokenVersion: user.tokenVersion ?? 0,
+    };
     const accessToken = await this.jwtService.signAsync(payload);
 
     await this.logsService.createLog(
@@ -119,7 +123,8 @@ export class AuthService {
     // Email delivery and ownership verification are not configured yet.
     // Never change credentials or return a password to an anonymous caller.
     return {
-      message: 'Vui lòng liên hệ quản trị viên để xác minh danh tính và hỗ trợ đặt lại mật khẩu.',
+      message:
+        'Vui lòng liên hệ quản trị viên để xác minh danh tính và hỗ trợ đặt lại mật khẩu.',
     };
   }
 }

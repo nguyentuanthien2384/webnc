@@ -29,7 +29,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(_req: Request, payload: JwtPayload) {
     const user = await this.usersService.findOneByEmail(payload.email);
-    if (!user || String(user._id) !== String(payload.sub) || (user.tokenVersion ?? 0) !== (payload.tokenVersion ?? 0)) {
+    if (
+      !user ||
+      String(user._id) !== String(payload.sub) ||
+      (user.tokenVersion ?? 0) !== (payload.tokenVersion ?? 0)
+    ) {
       throw new UnauthorizedException();
     }
 

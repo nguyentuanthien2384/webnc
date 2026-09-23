@@ -41,13 +41,19 @@ async function createAdmin() {
   const User = mongoose.model('User', UserSchema);
 
   const adminEmail = 'admin@unishare.com';
-  const adminPassword = 'admin123';
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   const existing = await User.findOne({ email: adminEmail });
   if (existing) {
     console.log('Admin account already exists:', adminEmail);
     await mongoose.disconnect();
     return;
+  }
+
+  if (!adminPassword || adminPassword.length < 12) {
+    throw new Error(
+      'Set ADMIN_PASSWORD (at least 12 characters) before seeding an admin',
+    );
   }
 
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
@@ -61,7 +67,6 @@ async function createAdmin() {
 
   console.log('Admin account created successfully!');
   console.log('  Email:   ', String(admin.email));
-  console.log('  Password:', adminPassword);
   console.log('  Role:    ', String(admin.role));
 
   await mongoose.disconnect();

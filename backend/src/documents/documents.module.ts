@@ -33,11 +33,18 @@ import { randomBytes } from 'crypto';
             'application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           ];
-          if (allowedMimes.includes(file.mimetype) && ['.pdf', '.doc', '.docx'].includes(extname(file.originalname).toLowerCase())) {
+          if (
+            allowedMimes.includes(file.mimetype) &&
+            ['.pdf', '.doc', '.docx'].includes(
+              extname(file.originalname).toLowerCase(),
+            )
+          ) {
             callback(null, true);
           } else {
             callback(
-              new BadRequestException('Chỉ cho phép upload file .pdf, .doc hoặc .docx'),
+              new BadRequestException(
+                'Chỉ cho phép upload file .pdf, .doc hoặc .docx',
+              ),
               false,
             );
           }

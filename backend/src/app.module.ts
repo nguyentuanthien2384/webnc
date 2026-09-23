@@ -8,8 +8,6 @@ import { AdminModule } from './admin/admin.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { LogsModule } from './logs/logs.module';
 import { CategoriesModule } from './categories/categories.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { ReportsModule } from './reports/reports.module';
 
 @Module({
@@ -21,11 +19,6 @@ import { ReportsModule } from './reports/reports.module';
         uri: configService.get<string>('DATABASE_URL'),
       }),
       inject: [ConfigService],
-    }),
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads', 'thumbnails'),
-      serveRoot: '/uploads/thumbnails',
-      serveStaticOptions: { index: false, fallthrough: false },
     }),
     AuthModule,
     UsersModule,

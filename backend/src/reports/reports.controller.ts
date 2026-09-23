@@ -1,9 +1,25 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Types } from 'mongoose';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/schemas/user.schema';
-import { CreateReportDto, ReportQueryDto, ResolveReportDto } from './report.dto';
+import {
+  CreateReportDto,
+  ReportQueryDto,
+  ResolveReportDto,
+} from './report.dto';
 import { ReportsService } from './reports.service';
 
 @Controller('reports')
@@ -12,7 +28,10 @@ export class ReportsController {
   constructor(private service: ReportsService) {}
 
   @Post()
-  create(@Body() dto: CreateReportDto, @Req() req: { user: { userId: string } }) {
+  create(
+    @Body() dto: CreateReportDto,
+    @Req() req: { user: { userId: string } },
+  ) {
     return this.service.create(dto, req.user.userId);
   }
 
@@ -24,7 +43,14 @@ export class ReportsController {
 
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.MODERATOR)
-  resolve(@Param('id') id: string, @Body() dto: ResolveReportDto, @Req() req: { user: { userId: string } }) {
+  resolve(
+    @Param('id') id: string,
+    @Body() dto: ResolveReportDto,
+    @Req() req: { user: { userId: string } },
+  ) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('ID báo cáo không hợp lệ.');
+    }
     return this.service.resolve(id, dto, req.user.userId);
   }
 }

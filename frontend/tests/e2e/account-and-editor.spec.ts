@@ -8,6 +8,19 @@ const user = {
   status: "ACTIVE",
 };
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/auth/me", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      userId: user._id,
+      email: user.email,
+      role: user.role,
+      permissions: ["documents.upload", "documents.update_own", "documents.delete_own", "documents.download", "reports.create", "drafts.manage_own"],
+    }),
+  }));
+});
+
 test("quên mật khẩu hiển thị kết quả chung và lỗi cấu hình SMTP", async ({ page }) => {
   let smtpConfigured = true;
   await page.route("**/auth/forgot-password", (route) =>
@@ -166,6 +179,7 @@ test("bản nháp có thể mở lại và lưu bản sao khi xung đột", asyn
   });
 
   await page.goto("/editor");
+  await expect(page.getByRole("button", { name: "Lưu vào tài khoản" })).toBeEnabled();
   await page.getByLabel("Tên bản nháp").fill("Ghi chú kiểm thử");
   await page.getByRole("button", { name: "Lưu vào tài khoản" }).click();
   await expect(page.getByRole("button", { name: "Ghi chú kiểm thử" })).toBeVisible();

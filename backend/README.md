@@ -21,6 +21,16 @@ Mặc định API ở `http://localhost:8000/api`. Để tạo quản trị viê
 - Khôi phục mật khẩu qua email với liên kết dùng một lần, hết hạn sau 15 phút; bản nháp trình soạn thảo riêng tư có thể gắn với tài liệu.
 - Quản trị người dùng, tài liệu, môn/ngành học; thống kê và nhật ký hoạt động.
 
+## Phân quyền
+
+Hệ thống có ba vai trò `USER`, `MODERATOR`, `ADMIN`. `GET /api/auth/me` và `POST /api/auth/login` trả `permissions: string[]` cho vai trò hiện tại; API đọc lại vai trò từ cơ sở dữ liệu mỗi lần xác thực nên thay đổi vai trò có hiệu lực ngay, kể cả với JWT đã cấp. Backend kiểm tra quyền theo tên chức năng ở từng API và trả HTTP 403 khi thiếu quyền. Giao diện có thể dùng danh sách này để hiện hoặc ẩn thao tác, nhưng quyết định cho phép vẫn thuộc backend.
+
+- **USER:** `documents.upload`, `documents.update_own`, `documents.delete_own`, `documents.download`, `reports.create`, `drafts.manage_own`. Sửa/xóa tài liệu và quản lý bản nháp luôn kiểm tra chủ sở hữu.
+- **MODERATOR:** toàn bộ quyền USER, thêm `dashboard.view` (dashboard hệ thống), `statistics.view`, `reports.review`, `users.list`, `users.moderate`, `documents.review`, `documents.moderate`. Chỉ được khóa/mở tài khoản USER khác; không được sửa vai trò, xóa tài khoản hoặc tài liệu, xem nhật ký hay sửa danh mục.
+- **ADMIN:** toàn bộ quyền MODERATOR, thêm `users.reset_password`, `users.delete`, `users.assign_role`, `admin.delegate`, `documents.delete_any`, `audit.view`, `catalog.manage`, `documents.generate_thumbnails`. Admin không thể khóa, xóa, đổi vai trò hay reset mật khẩu chính tài khoản Admin. Tài khoản USER bị khóa phải được mở khóa trước khi thăng thành Moderator. Quyền Admin chỉ chuyển cho Moderator bằng chức năng ủy quyền; Admin cũ trở thành Moderator.
+
+Dashboard cá nhân và `/api/users/me/stats` dùng được với mọi tài khoản đã đăng nhập. `dashboard.view` chỉ là quyền xem số liệu toàn hệ thống. `totalDownloads` ở thống kê cá nhân là lượt tải tích lũy, còn `totalUploads` và `avgDownloadsPerDoc` tính từ tài liệu hiện còn (kể cả tài liệu bị chặn). `/api/users/me/upload-stats` nhận `period=day|month|year|all|custom`; các ngày và ranh giới lọc theo `Asia/Ho_Chi_Minh`. Kỳ có giới hạn trả đủ ngày, kể cả ngày không có tài liệu. Kỳ `custom` cần `fromDate=YYYY-MM-DD`, có thể thêm `toDate`, tối đa 366 ngày.
+
 `GET /api/statistics/uploads-over-time?days=7` dành cho Admin/Moderator trả về đúng số ngày yêu cầu dưới dạng `{ date: "YYYY-MM-DD", count: number }`, gồm cả hôm nay và những ngày không có lượt tải lên (`count: 0`). Ngày và ranh giới ngày tính theo múi giờ `Asia/Ho_Chi_Minh` (UTC+7); thời điểm lưu trong MongoDB vẫn là UTC. `days` mặc định là 30, nhận số nguyên từ 1 đến 365.
 
 `GET /api/statistics/platform` giữ `totalDownloads` là tổng lượt tải tích lũy, kể cả lượt tải của tài liệu đã bị xóa. `totalUploads` là số tài liệu hiện còn; `avgDlPerDoc` là trung bình `downloadCount` của các tài liệu hiện còn (gồm tài liệu bị chặn), làm tròn hai chữ số. Vì hai chỉ số lượt tải có phạm vi khác nhau, không tính `avgDlPerDoc` bằng `totalDownloads / totalUploads`.

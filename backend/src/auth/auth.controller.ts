@@ -17,6 +17,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PasswordRecoveryService } from './password-recovery.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as ExpressRequest } from 'express';
+import { getPermissionsForRole } from './permissions';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: { userId: string; email: string; role: string };
@@ -66,6 +67,9 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   getProfile(@Request() req: AuthenticatedRequest) {
-    return req.user;
+    return {
+      ...req.user,
+      permissions: getPermissionsForRole(req.user.role),
+    };
   }
 }

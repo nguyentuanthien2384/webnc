@@ -16,6 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { Request as ExpressRequest } from 'express';
+import { GetMyUploadStatsQueryDto } from './dto/get-my-upload-stats-query.dto';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: { userId: string; email: string; role: string };
@@ -68,15 +69,13 @@ export class UsersController {
   @Get('me/upload-stats')
   getMyUploadStats(
     @Request() req: AuthenticatedRequest,
-    @Query('period') period?: string,
-    @Query('fromDate') fromDate?: string,
-    @Query('toDate') toDate?: string,
+    @Query() query: GetMyUploadStatsQueryDto,
   ) {
     return this.usersService.getMyUploadStats(
       req.user.userId,
-      period,
-      fromDate,
-      toDate,
+      query.period,
+      query.fromDate,
+      query.toDate,
     );
   }
 

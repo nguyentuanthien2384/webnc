@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Types } from 'mongoose';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '../users/schemas/user.schema';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { Permissions } from '../auth/decorators/permissions.decorator';
+import { Permission } from '../auth/permissions';
 import {
   CreateReportDto,
   ReportQueryDto,
@@ -23,11 +23,12 @@ import {
 import { ReportsService } from './reports.service';
 
 @Controller('reports')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'), PermissionsGuard)
 export class ReportsController {
   constructor(private service: ReportsService) {}
 
   @Post()
+  @Permissions(Permission.REPORTS_CREATE)
   create(
     @Body() dto: CreateReportDto,
     @Req() req: { user: { userId: string } },
@@ -36,13 +37,13 @@ export class ReportsController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.REPORTS_REVIEW)
   list(@Query() query: ReportQueryDto) {
     return this.service.findAll(query);
   }
 
   @Patch(':id')
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.REPORTS_REVIEW)
   resolve(
     @Param('id') id: string,
     @Body() dto: ResolveReportDto,

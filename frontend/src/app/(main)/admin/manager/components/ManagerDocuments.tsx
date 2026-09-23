@@ -9,11 +9,12 @@ import {
 } from "@/hooks/useAdminMutateDocument";
 import { Document as DocType } from "@/@types/document.type";
 import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
-import { useAuthStore } from "@/store/auth.store"; // Import để kiểm tra quyền Admin
+import { useAuthStore } from "@/store/auth.store";
 import Pagination from "@/components/common/Pagination";
 import { downloadExcel } from "@/lib/downloadExcel";
 import { toast } from "react-hot-toast";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { hasPermission } from "@/lib/permissions";
 
 export default function ManageDocuments() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,8 +22,9 @@ export default function ManageDocuments() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [pageState, setPageState] = useState({ search: "", page: 1 });
   const page = pageState.search === debouncedSearchTerm ? pageState.page : 1;
-  const { user } = useAuthStore(); // Lấy user hiện tại
-  const isAdmin = user?.role === "ADMIN";
+  const { user } = useAuthStore();
+  const canModerateDocuments = hasPermission(user, "documents.moderate");
+  const canDeleteAnyDocument = hasPermission(user, "documents.delete_any");
 
   const { data: docData, isLoading, isError } = useAdminDocuments(debouncedSearchTerm, page);
 
@@ -108,7 +110,6 @@ export default function ManageDocuments() {
         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm mb-4"
       />
 
-      {/* Bảng hiển thị tài liệu */}
       <div className="overflow-x-auto border rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -160,8 +161,7 @@ export default function ManageDocuments() {
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  {/* Nút Block/Unblock */}
-                  {doc.status === "VISIBLE" ? (
+                  {canModerateDocuments && (doc.status === "VISIBLE" ? (
                     <button
                       onClick={() => setModalState({ action: "block", doc })}
                       className="text-red-600 hover:text-red-900"
@@ -175,10 +175,9 @@ export default function ManageDocuments() {
                     >
                       Unblock
                     </button>
-                  )}
+                  ))}
 
-                  {/* Nút Delete (Chỉ Admin) */}
-                  {isAdmin && (
+                  {canDeleteAnyDocument && (
                     <button
                       onClick={() => setModalState({ action: "delete", doc })}
                       className="text-gray-500 hover:text-gray-800"

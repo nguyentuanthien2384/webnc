@@ -17,9 +17,13 @@ import {
   UpdateEditorDraftDto,
 } from './editor-draft.dto';
 import { EditorService } from './editor.service';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { Permissions } from '../auth/decorators/permissions.decorator';
+import { Permission } from '../auth/permissions';
 
 @Controller('editor/drafts')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), PermissionsGuard)
+@Permissions(Permission.DRAFTS_MANAGE_OWN)
 export class EditorController {
   constructor(private readonly service: EditorService) {}
 

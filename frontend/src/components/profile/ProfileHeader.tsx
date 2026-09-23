@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { ROLE_LABELS } from "@/lib/permissions";
 import { User } from "@/@types/user.type";
 import { useMyStats } from "@/hooks/useMyStats";
 import {
@@ -108,7 +109,7 @@ export default function ProfileHeader({
                           ? "bg-blue-100 text-blue-700"
                           : "bg-gray-100 text-gray-600"
                     }`}>
-                      {user.role}
+                      {ROLE_LABELS[user.role]}
                     </span>
                     <span className="text-xs text-gray-400">
                       Tham gia {new Date(user.joinedDate).toLocaleDateString("vi-VN")}

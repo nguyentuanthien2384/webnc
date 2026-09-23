@@ -27,7 +27,14 @@ export const useAuthStore = create(
 
       setHasHydrated: (hasHydrated) => set({ _hasHydrated: hasHydrated }),
 
-      setUser: (user) => set({ user }),
+      setUser: (user) => set((state) => ({
+        user: {
+          ...state.user,
+          ...user,
+          permissions: user.permissions ??
+            (state.user?.role === user.role ? state.user?.permissions : undefined),
+        },
+      })),
 
       login: async (email, password) => {
         try {

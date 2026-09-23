@@ -6,6 +6,7 @@ import FileUploadStep from "@/components/upload/FileUploadStep";
 import FileDetailsStep from "@/components/upload/FileDetailsStep";
 import UploadDoneStep from "@/components/upload/UploadDoneStep";
 import { toast } from "react-hot-toast";
+import RoleGuard from "@/components/auth/RoleGuard";
 import {
   CloudArrowUpIcon,
   DocumentTextIcon,
@@ -18,7 +19,7 @@ const steps = [
   { id: 3, name: "Tải lên", icon: CheckCircleIcon },
 ];
 
-export default function UploadPage() {
+function UploadContent() {
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<File[]>([]);
   const [metadata, setMetadata] = useState<Partial<UploadDocumentDto>[]>([]);
@@ -131,4 +132,10 @@ export default function UploadPage() {
       </div>
     </main>
   );
+}
+
+export default function UploadPage() {
+  return <RoleGuard allowedRoles={["USER", "MODERATOR", "ADMIN"]} requiredPermission="documents.upload">
+    <UploadContent />
+  </RoleGuard>;
 }

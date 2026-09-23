@@ -37,6 +37,16 @@ function createTwoPagePdf(): Buffer {
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.route("**/auth/me", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      userId: user._id,
+      email: user.email,
+      role: user.role,
+      permissions: ["documents.upload", "documents.update_own", "documents.delete_own", "documents.download", "reports.create", "drafts.manage_own"],
+    }),
+  }));
   await page.addInitScript((storedUser) => {
     window.localStorage.setItem("auth-storage", JSON.stringify({
       state: { user: storedUser, token: "test-jwt", isAuthenticated: true },

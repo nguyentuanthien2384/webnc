@@ -227,7 +227,7 @@ function StatisticsPageContent() {
 
 export default function StatisticsPage() {
   return (
-    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]}>
+    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]} requiredPermission="statistics.view">
       <StatisticsPageContent />
     </RoleGuard>
   );

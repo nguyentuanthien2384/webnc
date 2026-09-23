@@ -22,6 +22,7 @@ import {
   resolveUploadPath,
 } from '../common/document-storage';
 import { validateUploadedDocument } from './validate-uploaded-document';
+import { hasPermission, Permission } from '../auth/permissions';
 
 const escapeRegex = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -156,8 +157,7 @@ export class DocumentsService {
     }
     if (
       doc.status !== DocumentStatus.VISIBLE &&
-      userRole !== 'ADMIN' &&
-      userRole !== 'MODERATOR'
+      !hasPermission(userRole ?? '', Permission.DOCUMENTS_MODERATE)
     ) {
       throw new NotFoundException('Document not found');
     }

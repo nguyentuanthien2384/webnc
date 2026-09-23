@@ -251,6 +251,18 @@ describe('AdminService', () => {
   });
 
   describe('setUserRole', () => {
+    it('should reject promoting a blocked user to Moderator', async () => {
+      userModel.findById.mockResolvedValue({
+        ...mockUser,
+        status: UserStatus.BLOCKED,
+        role: UserRole.USER,
+      });
+
+      await expect(
+        service.setUserRole('userId123', UserRole.MODERATOR, 'adminId'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
     it('should promote USER to MODERATOR and log PROMOTE_USER', async () => {
       const userWithSave = {
         ...mockUser,
@@ -340,6 +352,21 @@ describe('AdminService', () => {
   });
 
   describe('resetPassword', () => {
+    it('should forbid resetting an Admin account or the current actor', async () => {
+      userModel.findById.mockResolvedValue({
+        ...mockUser,
+        role: UserRole.ADMIN,
+      });
+      await expect(service.resetPassword('adminId', 'adminId')).rejects.toThrow(
+        ForbiddenException,
+      );
+
+      userModel.findById.mockResolvedValue(mockUser);
+      await expect(
+        service.resetPassword('userId123', 'userId123'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
     it('should reset password to a random value and hash it', async () => {
       const userWithSave = { ...mockUser, save: jest.fn() };
       userModel.findById.mockResolvedValue(userWithSave);

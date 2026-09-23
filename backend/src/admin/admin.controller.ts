@@ -12,8 +12,9 @@ import {
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { Permissions } from '../auth/decorators/permissions.decorator';
+import { Permission } from '../auth/permissions';
 import { UserRole } from '../users/schemas/user.schema';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { CreateSubjectDto } from './dto/create-subject.dto';
@@ -30,7 +31,7 @@ interface AuthenticatedRequest extends ExpressRequest {
   user: { userId: string; email: string; role: string };
 }
 
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'), PermissionsGuard)
 @Controller('admin')
 export class AdminController {
   constructor(
@@ -38,7 +39,7 @@ export class AdminController {
     private readonly logsService: LogsService,
   ) {}
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.USERS_RESET_PASSWORD)
   @Post('users/:id/reset-password')
   resetPassword(
     @Param('id') userId: string,
@@ -47,7 +48,7 @@ export class AdminController {
     return this.adminService.resetPassword(userId, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.USERS_MODERATE)
   @Post('users/:id/block')
   blockUser(@Param('id') userId: string, @Request() req: AuthenticatedRequest) {
     return this.adminService.blockUser(
@@ -57,7 +58,7 @@ export class AdminController {
     );
   }
 
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.USERS_MODERATE)
   @Post('users/:id/unblock')
   unblockUser(
     @Param('id') userId: string,
@@ -70,7 +71,7 @@ export class AdminController {
     );
   }
 
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.DOCUMENTS_MODERATE)
   @Post('documents/:id/block')
   blockDocument(
     @Param('id') docId: string,
@@ -79,7 +80,7 @@ export class AdminController {
     return this.adminService.blockDocument(docId, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.DOCUMENTS_MODERATE)
   @Post('documents/:id/unblock')
   unblockDocument(
     @Param('id') docId: string,
@@ -88,7 +89,7 @@ export class AdminController {
     return this.adminService.unblockDocument(docId, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.USERS_DELETE)
   @Delete('users/:id')
   deleteUser(
     @Param('id') userId: string,
@@ -97,13 +98,13 @@ export class AdminController {
     return this.adminService.deleteUser(userId, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.DOCUMENTS_REVIEW)
   @Get('documents')
   getDocumentsAdmin(@Query() queryDto: GetDocumentsQueryDto) {
     return this.adminService.getDocumentsAdmin(queryDto);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.DOCUMENTS_DELETE_ANY)
   @Delete('documents/:id')
   deleteDocument(
     @Param('id') docId: string,
@@ -112,7 +113,7 @@ export class AdminController {
     return this.adminService.deleteDocument(docId, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.USERS_ASSIGN_ROLE)
   @Patch('users/:id/role')
   setUserRole(
     @Param('id') userId: string,
@@ -126,7 +127,7 @@ export class AdminController {
     );
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.ADMIN_DELEGATE)
   @Post('delegate-admin/:id')
   delegateAdmin(
     @Param('id') targetUserId: string,
@@ -135,19 +136,19 @@ export class AdminController {
     return this.adminService.delegateAdmin(targetUserId, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN, UserRole.MODERATOR)
+  @Permissions(Permission.USERS_LIST)
   @Get('users')
   getUsers(@Query() queryDto: GetUsersQueryDto) {
     return this.adminService.getUsers(queryDto);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.AUDIT_VIEW)
   @Get('logs')
   getLogs(@Query() queryDto: GetLogsQueryDto) {
     return this.logsService.findAll(queryDto);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.CATALOG_MANAGE)
   @Post('subjects')
   createSubject(
     @Body() createSubjectDto: CreateSubjectDto,
@@ -156,13 +157,13 @@ export class AdminController {
     return this.adminService.createSubject(createSubjectDto, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.CATALOG_MANAGE)
   @Get('subjects')
   findAllSubjects() {
     return this.adminService.findAllSubjects();
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.CATALOG_MANAGE)
   @Patch('subjects/:id')
   updateSubject(
     @Param('id') id: string,
@@ -176,13 +177,13 @@ export class AdminController {
     );
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.CATALOG_MANAGE)
   @Delete('subjects/:id')
   removeSubject(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.adminService.removeSubject(id, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.CATALOG_MANAGE)
   @Post('majors')
   createMajor(
     @Body() createMajorDto: CreateMajorDto,
@@ -191,13 +192,13 @@ export class AdminController {
     return this.adminService.createMajor(createMajorDto, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.CATALOG_MANAGE)
   @Get('majors')
   findAllMajors() {
     return this.adminService.findAllMajors();
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.CATALOG_MANAGE)
   @Patch('majors/:id')
   updateMajor(
     @Param('id') id: string,
@@ -207,7 +208,7 @@ export class AdminController {
     return this.adminService.updateMajor(id, updateMajorDto, req.user.userId);
   }
 
-  @Roles(UserRole.ADMIN)
+  @Permissions(Permission.CATALOG_MANAGE)
   @Delete('majors/:id')
   removeMajor(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.adminService.removeMajor(id, req.user.userId);

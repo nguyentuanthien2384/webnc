@@ -9,6 +9,7 @@ import ManageDocuments from "./components/ManagerDocuments";
 import ManageLogs from "./components/ManagerLogs";
 import ManageReports from "./components/ManagerReports";
 import { useAuthStore } from "@/store/auth.store";
+import { hasPermission } from "@/lib/permissions";
 import {
   AcademicCapIcon,
   BookOpenIcon,
@@ -23,7 +24,11 @@ function ManageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuthStore();
-  const isAdmin = user?.role === "ADMIN";
+  const canManageCatalog = hasPermission(user, "catalog.manage");
+  const canReviewDocuments = hasPermission(user, "documents.review");
+  const canReviewReports = hasPermission(user, "reports.review");
+  const canListUsers = hasPermission(user, "users.list");
+  const canViewAudit = hasPermission(user, "audit.view");
 
   const baseTabs = [
     { key: "subjects" as const, label: "Môn học", icon: BookOpenIcon },
@@ -37,11 +42,17 @@ function ManageContent() {
   ];
 
   const reportTab = { key: "reports" as const, label: "Báo cáo", icon: ClipboardDocumentListIcon };
-  const tabs = isAdmin ? [...baseTabs, reportTab, ...adminTabs] : [baseTabs[2], reportTab, adminTabs[0]];
+  const tabs = [
+    ...(canManageCatalog ? baseTabs.slice(0, 2) : []),
+    ...(canReviewDocuments ? [baseTabs[2]] : []),
+    ...(canReviewReports ? [reportTab] : []),
+    ...(canListUsers ? [adminTabs[0]] : []),
+    ...(canViewAudit ? [adminTabs[1]] : []),
+  ];
   const requestedTab = searchParams.get("tab");
-  const tab: TabType = tabs.some(({ key }) => key === requestedTab)
+  const tab: TabType | undefined = tabs.some(({ key }) => key === requestedTab)
     ? (requestedTab as TabType)
-    : "documents";
+    : canReviewDocuments ? "documents" : tabs[0]?.key;
 
   return (
       <main className="flex-1 bg-gray-50 p-6">
@@ -50,9 +61,7 @@ function ManageContent() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900">Quản lý hệ thống</h1>
             <p className="mt-1 text-gray-500">
-              {isAdmin
-                ? "Quản lý môn học, ngành học, tài liệu, người dùng, báo cáo và logs"
-                : "Quản lý tài liệu, người dùng và báo cáo"}
+              Các mục quản lý hiển thị theo quyền của tài khoản. Chọn một mục để xem và xử lý dữ liệu liên quan.
             </p>
           </div>
 
@@ -80,12 +89,13 @@ function ManageContent() {
             </div>
 
             <div className="p-6">
-              {tab === "subjects" && isAdmin && <ManageSubjects />}
-              {tab === "majors" && isAdmin && <ManageMajors />}
-              {tab === "documents" && <ManageDocuments />}
-              {tab === "users" && <ManageUsers />}
-              {tab === "logs" && isAdmin && <ManageLogs />}
-              {tab === "reports" && <ManageReports />}
+              {!tab && <p role="alert" className="text-sm text-gray-600">Tài khoản hiện không có quyền quản lý mục nào.</p>}
+              {tab === "subjects" && canManageCatalog && <ManageSubjects />}
+              {tab === "majors" && canManageCatalog && <ManageMajors />}
+              {tab === "documents" && canReviewDocuments && <ManageDocuments />}
+              {tab === "users" && canListUsers && <ManageUsers />}
+              {tab === "logs" && canViewAudit && <ManageLogs />}
+              {tab === "reports" && canReviewReports && <ManageReports />}
             </div>
           </div>
         </div>
@@ -95,7 +105,7 @@ function ManageContent() {
 
 export default function ManagePage() {
   return (
-    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]}>
+    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]} requiredPermission="documents.review">
       <Suspense fallback={<main className="flex-1 bg-gray-50 p-6" role="status">Đang tải trang quản lý…</main>}>
         <ManageContent />
       </Suspense>

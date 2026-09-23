@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useState, type ComponentType, type SVGProps } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import RoleGuard from "@/components/auth/RoleGuard";
 import UploadsOverTimeChart from "@/components/statistics/UploadsOverTimeChart";
 import { usePlatformStats } from "@/hooks/usePlatformStats";
 import { useDocuments } from "@/hooks/useDocuments";
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios";
+import { hasPermission, ROLE_LABELS } from "@/lib/permissions";
 import type { Document } from "@/@types/document.type";
+import PersonalDashboard from "./PersonalDashboard";
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
@@ -23,6 +24,19 @@ import {
   ExclamationTriangleIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+
+interface OpenReport {
+  _id: string;
+  document: { _id: string; title: string; status: string } | null;
+  reporter: { fullName: string } | null;
+  reason: string;
+  createdAt: string;
+}
+
+interface OpenReportsResponse {
+  data: OpenReport[];
+  pagination: { total: number };
+}
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 const numberFormatter = new Intl.NumberFormat("vi-VN");
@@ -133,8 +147,14 @@ function DocumentList({ documents, variant }: { documents: Document[]; variant: 
   );
 }
 
-function DashboardContent() {
+function StaffDashboard() {
   const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === "ADMIN";
+  const adminActions = [
+    { permission: "catalog.manage" as const, href: "/admin/manager?tab=subjects", label: "Môn học", description: "Cập nhật danh mục môn học", icon: DocumentTextIcon },
+    { permission: "catalog.manage" as const, href: "/admin/manager?tab=majors", label: "Ngành học", description: "Tổ chức danh mục ngành học", icon: ChartBarIcon },
+    { permission: "audit.view" as const, href: "/admin/manager?tab=logs", label: "Nhật ký hệ thống", description: "Theo dõi hoạt động quản trị", icon: ClockIcon },
+  ].filter((action) => hasPermission(user, action.permission));
   const queryClient = useQueryClient();
   const [days, setDays] = useState(30);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -144,10 +164,11 @@ function DashboardContent() {
   const { data: pendingReports, isLoading: isReportsLoading, isError: isReportsError, refetch: refetchReports } = useQuery({
     queryKey: ["dashboardOpenReportsCount"],
     queryFn: async () => {
-      const response = await api.get<{ pagination: { total: number } }>("/reports", { params: { status: "OPEN", page: 1 } });
-      return response.data.pagination.total;
+      const response = await api.get<OpenReportsResponse>("/reports", { params: { status: "OPEN", page: 1 } });
+      return response.data;
     },
   });
+  const pendingCount = pendingReports?.pagination.total;
   const hasStaleData =
     (isStatsError && !!stats) ||
     (isRecentError && !!recentResponse) ||
@@ -175,18 +196,20 @@ function DashboardContent() {
         <header className="overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-blue-900 to-blue-700 p-6 text-white shadow-sm sm:p-8">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-200">UniShare / Bảng điều khiển</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-200">UniShare / Bảng điều khiển · {user ? ROLE_LABELS[user.role] : ""}</p>
               <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Chào {user?.fullName || "bạn"}</h1>
-              <p className="mt-2 text-sm leading-6 text-blue-100 sm:text-base">Theo dõi hoạt động chia sẻ và những việc cần xử lý tại một nơi.</p>
+              <p className="mt-2 text-sm leading-6 text-blue-100 sm:text-base">{isAdmin ? "Nắm bắt hoạt động của UniShare và điều hành các khu vực bạn phụ trách." : "Theo dõi tài liệu, người dùng và các báo cáo cần kiểm duyệt."}</p>
             </div>
             <div className="flex flex-wrap gap-2 sm:gap-3">
               <button type="button" onClick={() => void refreshDashboard()} disabled={isRefreshing} className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-wait disabled:opacity-60">
                 <ArrowPathIcon className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true" />
                 {isRefreshing ? "Đang làm mới..." : "Làm mới"}
               </button>
-              <Link href="/upload" className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-                <CloudArrowUpIcon className="h-4 w-4" aria-hidden="true" />Đăng tài liệu
-              </Link>
+              {hasPermission(user, "documents.upload") && (
+                <Link href="/upload" className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-blue-900 transition hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  <CloudArrowUpIcon className="h-4 w-4" aria-hidden="true" />Đăng tài liệu
+                </Link>
+              )}
             </div>
           </div>
         </header>
@@ -246,8 +269,8 @@ function DashboardContent() {
                 <h2 id="dashboard-attention-heading" className="text-lg font-bold text-slate-900">Cần chú ý</h2>
                 <p className="mt-1 text-sm text-slate-500">Các báo cáo đang chờ xử lý.</p>
               </div>
-              <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${pendingReports === 0 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}>
-                {pendingReports === 0 ? <CheckCircleIcon className="h-5 w-5" aria-hidden="true" /> : <ExclamationTriangleIcon className="h-5 w-5" aria-hidden="true" />}
+              <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${pendingCount === 0 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}>
+                {pendingCount === 0 ? <CheckCircleIcon className="h-5 w-5" aria-hidden="true" /> : <ExclamationTriangleIcon className="h-5 w-5" aria-hidden="true" />}
               </span>
             </div>
             <div className="mt-6">
@@ -256,13 +279,27 @@ function DashboardContent() {
               ) : isReportsError && pendingReports === undefined ? (
                 <SectionError message="Không thể tải báo cáo chờ xử lý." onRetry={() => void refetchReports()} />
               ) : (
-                <div className={`rounded-xl border p-4 ${pendingReports === 0 ? "border-emerald-100 bg-emerald-50/70" : "border-amber-100 bg-amber-50/70"}`}>
-                  <p className={`text-4xl font-bold tabular-nums tracking-tight ${pendingReports === 0 ? "text-emerald-900" : "text-amber-900"}`}>{numberFormatter.format(pendingReports ?? 0)}</p>
-                  <p className={`mt-1 text-sm font-medium ${pendingReports === 0 ? "text-emerald-900" : "text-amber-900"}`}>Báo cáo chờ xử lý</p>
-                  <p className={`mt-1 text-xs leading-5 ${pendingReports === 0 ? "text-emerald-800" : "text-amber-800"}`}>{pendingReports === 0 ? "Không có báo cáo mới cần xử lý." : "Mở trang quản lý để xem và xử lý báo cáo."}</p>
+                <div className={`rounded-xl border p-4 ${pendingCount === 0 ? "border-emerald-100 bg-emerald-50/70" : "border-amber-100 bg-amber-50/70"}`}>
+                  <p className={`text-4xl font-bold tabular-nums tracking-tight ${pendingCount === 0 ? "text-emerald-900" : "text-amber-900"}`}>{numberFormatter.format(pendingCount ?? 0)}</p>
+                  <p className={`mt-1 text-sm font-medium ${pendingCount === 0 ? "text-emerald-900" : "text-amber-900"}`}>Báo cáo chờ xử lý</p>
+                  <p className={`mt-1 text-xs leading-5 ${pendingCount === 0 ? "text-emerald-800" : "text-amber-800"}`}>{pendingCount === 0 ? "Không có báo cáo mới cần xử lý." : "Mở trang quản lý để xem và xử lý báo cáo."}</p>
                 </div>
               )}
             </div>
+            {!!pendingReports?.data?.length && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Báo cáo mới nhất</p>
+                <ul className="mt-2 divide-y divide-slate-100">
+                  {pendingReports.data.slice(0, 3).map((report) => (
+                    <li key={report._id} className="py-2.5">
+                      <p className="truncate text-sm font-semibold text-slate-800">{report.document?.title ?? "Tài liệu đã bị xóa"}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-slate-500">{report.reason}</p>
+                      <p className="mt-1 text-xs text-slate-400">{report.reporter?.fullName ?? "Tài khoản đã bị xóa"} · {formatDate(report.createdAt)}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="mt-5 border-t border-slate-100 pt-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Lối tắt</p>
               <Link href="/admin/manager?tab=reports" className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
@@ -271,6 +308,11 @@ function DashboardContent() {
               <Link href="/admin/manager?tab=documents" className="mt-2 flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
                 <span className="inline-flex items-center gap-2"><DocumentTextIcon className="h-4 w-4" aria-hidden="true" />Quản lý tài liệu</span><ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
               </Link>
+              {hasPermission(user, "users.list") && (
+                <Link href="/admin/manager?tab=users" className="mt-2 flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
+                  <span className="inline-flex items-center gap-2"><UsersIcon className="h-4 w-4" aria-hidden="true" />Quản lý người dùng</span><ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              )}
             </div>
           </aside>
         </div>
@@ -298,15 +340,30 @@ function DashboardContent() {
             <Link href="/" className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-blue-700 hover:text-blue-900">Khám phá tài liệu<ArrowRightIcon className="h-4 w-4" aria-hidden="true" /></Link>
           </section>
         </div>
+        {adminActions.length > 0 && (
+          <section aria-labelledby="dashboard-admin-heading" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div>
+              <h2 id="dashboard-admin-heading" className="text-lg font-bold text-slate-900">Quản trị nền tảng</h2>
+              <p className="mt-1 text-sm text-slate-500">Các công cụ quản trị được cấp cho tài khoản của bạn.</p>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {adminActions.map(({ href, label, description, icon: Icon }) => (
+                <Link key={href} href={href} className="group flex items-center gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-blue-200 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 group-hover:bg-white"><Icon className="h-5 w-5" aria-hidden="true" /></span>
+                  <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-slate-800">{label}</span><span className="mt-0.5 block text-xs text-slate-500">{description}</span></span>
+                  <ArrowRightIcon className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-blue-700" aria-hidden="true" />
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );
 }
 
 export default function DashboardPage() {
-  return (
-    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]}>
-      <DashboardContent />
-    </RoleGuard>
-  );
+  const user = useAuthStore((state) => state.user);
+  if (!user) return <main className="flex-1 p-6" role="status">Đang tải thông tin người dùng...</main>;
+  return hasPermission(user, "dashboard.view") ? <StaffDashboard /> : <PersonalDashboard />;
 }

@@ -9,16 +9,16 @@ interface DocumentsResponse {
   pagination: { total: number; page: number; limit: number; totalPages: number };
 }
 
-const getMyDocuments = async (page: number, year: string, month: string): Promise<DocumentsResponse> => {
+const getMyDocuments = async (page: number, year: string, month: string, limit: number): Promise<DocumentsResponse> => {
   const response = await api.get("/documents/my-uploads", {
-    params: { page, limit: 10, year: year || undefined, month: month || undefined },
+    params: { page, limit, year: year || undefined, month: month || undefined },
   });
   return response.data;
 };
 
-export const useMyDocuments = (page = 1, year = "", month = "") => {
+export const useMyDocuments = (page = 1, year = "", month = "", limit = 10) => {
   return useQuery({
-    queryKey: ["myDocuments", page, year, month],
-    queryFn: () => getMyDocuments(page, year, month),
+    queryKey: ["myDocuments", page, year, month, limit],
+    queryFn: () => getMyDocuments(page, year, month, limit),
   });
 };

@@ -4,18 +4,21 @@ import { useRouter } from "next/navigation";
 import { UserRole } from "@/@types/user.type";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
+import { hasPermission, type Permission } from "@/lib/permissions";
 
 interface RoleGuardProps {
   children: React.ReactNode;
   allowedRoles: UserRole[];
+  requiredPermission?: Permission;
 }
 
-export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
+export default function RoleGuard({ children, allowedRoles, requiredPermission }: RoleGuardProps) {
   const { user } = useAuthStore();
   const router = useRouter();
 
   // Kiểm tra quyền (tránh lỗi crash nếu user đang null)
-  const isAllowed = user ? allowedRoles.includes(user.role) : false;
+  const isAllowed = !!user && allowedRoles.includes(user.role) &&
+    (!requiredPermission || hasPermission(user, requiredPermission));
 
   // 1. Đưa useEffect lên trên cùng, trước mọi lệnh `return`
   useEffect(() => {

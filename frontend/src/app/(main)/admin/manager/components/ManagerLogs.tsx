@@ -191,7 +191,7 @@ function ManageLogsContent() {
 
 export default function ManageLogs() {
   return (
-    <RoleGuard allowedRoles={["ADMIN"]}>
+    <RoleGuard allowedRoles={["ADMIN"]} requiredPermission="audit.view">
       <ManageLogsContent />
     </RoleGuard>
   );

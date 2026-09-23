@@ -13,13 +13,16 @@ import {
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import GlobalSearch from "./GlobalSearch";
+import { hasPermission, ROLE_LABELS } from "@/lib/permissions";
 
 export default function Navbar() {
   const { isAuthenticated, user, logout } = useAuthStore();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const isModeratorOrAdmin =
-    isAuthenticated && user && ["ADMIN", "MODERATOR"].includes(user.role);
+  const canReviewDocuments = hasPermission(user, "documents.review");
+  const canViewStatistics = hasPermission(user, "statistics.view");
+  const canUpload = hasPermission(user, "documents.upload");
+  const canEditDrafts = hasPermission(user, "drafts.manage_own");
 
   const getAvatarFallback = () => {
     if (!user) return "...";
@@ -59,38 +62,36 @@ export default function Navbar() {
         <div className="flex-shrink-0 flex items-center gap-3">
           {isAuthenticated && user ? (
             <>
-              {isModeratorOrAdmin && (
+              {canReviewDocuments && (
                 <Link
-                  href="/admin/manager"
+                  href="/admin/manager?tab=documents"
                   className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition"
                 >
                   <Cog6ToothIcon className="w-4 h-4" />
                   Quản lý
                 </Link>
               )}
-              {isModeratorOrAdmin && (
-                <Link
-                  href="/dashboard"
-                  className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition"
-                >
-                  <ChartBarIcon className="w-4 h-4" />
-                  Dashboard
-                </Link>
-              )}
               <Link
+                href="/dashboard"
+                className="hidden md:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition"
+              >
+                <ChartBarIcon className="w-4 h-4" />
+                Dashboard
+              </Link>
+              {canUpload && <Link
                 href="/upload"
                 className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-sm"
               >
                 <CloudArrowUpIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Chia sẻ</span>
-              </Link>
-              <Link
+              </Link>}
+              {canEditDrafts && <Link
                 href="/editor"
                 className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 transition"
               >
                 <PencilSquareIcon className="w-4 h-4" />
                 Soạn thảo
-              </Link>
+              </Link>}
 
               {/* Avatar Menu */}
               <Menu as="div" className="relative">
@@ -129,10 +130,43 @@ export default function Navbar() {
                             ? "bg-blue-100 text-blue-700"
                             : "bg-gray-100 text-gray-600"
                       }`}>
-                        {user.role}
+                        {ROLE_LABELS[user.role]}
                       </span>
                     </div>
                     <div className="py-1">
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href="/dashboard"
+                            className={`${active ? "bg-gray-50" : ""} flex items-center w-full px-4 py-2.5 text-sm text-gray-700`}
+                          >
+                            <ChartBarIcon className="w-4 h-4 mr-3 text-gray-400" />
+                            Dashboard
+                          </Link>
+                        )}
+                      </Menu.Item>
+                      {canReviewDocuments && <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href="/admin/manager?tab=documents"
+                            className={`${active ? "bg-gray-50" : ""} flex items-center w-full px-4 py-2.5 text-sm text-gray-700`}
+                          >
+                            <Cog6ToothIcon className="w-4 h-4 mr-3 text-gray-400" />
+                            Quản lý hệ thống
+                          </Link>
+                        )}
+                      </Menu.Item>}
+                      {canViewStatistics && <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href="/statistics"
+                            className={`${active ? "bg-gray-50" : ""} flex items-center w-full px-4 py-2.5 text-sm text-gray-700`}
+                          >
+                            <ChartBarIcon className="w-4 h-4 mr-3 text-gray-400" />
+                            Thống kê
+                          </Link>
+                        )}
+                      </Menu.Item>}
                       <Menu.Item>
                         {({ active }) => (
                           <Link
@@ -144,7 +178,7 @@ export default function Navbar() {
                           </Link>
                         )}
                       </Menu.Item>
-                      <Menu.Item>
+                      {canEditDrafts && <Menu.Item>
                         {({ active }) => (
                           <Link
                             href="/editor"
@@ -154,7 +188,7 @@ export default function Navbar() {
                             Soạn thảo JSON
                           </Link>
                         )}
-                      </Menu.Item>
+                      </Menu.Item>}
                       <div className="h-px bg-gray-100 mx-3" />
                       <Menu.Item>
                         {({ active }) => (

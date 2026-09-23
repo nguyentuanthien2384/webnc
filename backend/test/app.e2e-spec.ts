@@ -229,6 +229,184 @@ describe('UniShare API with isolated MongoDB', () => {
       .expect(200);
   });
 
+  it('exposes effective permissions and enforces the role matrix on protected APIs', async () => {
+    const me = await request(app.getHttpServer())
+      .get('/api/auth/me')
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(me.body.permissions).toEqual(
+      expect.arrayContaining(['documents.upload', 'reports.create']),
+    );
+    expect(me.body.permissions).not.toContain('statistics.view');
+
+    const moderatorLogin = await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email: mod.email, password: mod.password })
+      .expect(200);
+    expect(moderatorLogin.body.user.permissions).toEqual(
+      expect.arrayContaining(['dashboard.view', 'reports.review']),
+    );
+    expect(moderatorLogin.body.user.permissions).not.toContain(
+      'users.assign_role',
+    );
+
+    for (const path of [
+      '/api/statistics/platform',
+      '/api/reports',
+      '/api/admin/users',
+      '/api/admin/documents',
+      '/api/admin/logs',
+    ]) {
+      await request(app.getHttpServer())
+        .get(path)
+        .auth(token, { type: 'bearer' })
+        .expect(403);
+    }
+    for (const path of [
+      '/api/statistics/platform',
+      '/api/reports',
+      '/api/admin/users',
+      '/api/admin/documents',
+    ]) {
+      await request(app.getHttpServer())
+        .get(path)
+        .auth(modToken, { type: 'bearer' })
+        .expect(200);
+    }
+    await request(app.getHttpServer())
+      .get('/api/admin/logs')
+      .auth(modToken, { type: 'bearer' })
+      .expect(403);
+    await request(app.getHttpServer())
+      .post('/api/documents/generate-thumbnails')
+      .auth(modToken, { type: 'bearer' })
+      .expect(403);
+    await request(app.getHttpServer())
+      .post('/api/documents/generate-thumbnails')
+      .auth(adminToken, { type: 'bearer' })
+      .expect(201);
+    await request(app.getHttpServer())
+      .patch(`/api/admin/users/${userId}/role`)
+      .auth(modToken, { type: 'bearer' })
+      .send({ role: 'MODERATOR' })
+      .expect(403);
+    await request(app.getHttpServer())
+      .post(`/api/admin/users/${adminId}/reset-password`)
+      .auth(adminToken, { type: 'bearer' })
+      .expect(403);
+
+    // The strategy reloads the role from the database on every request.
+    await db
+      .collection('users')
+      .updateOne(
+        { _id: new Types.ObjectId(modId) },
+        { $set: { role: 'USER' } },
+      );
+    try {
+      const downgraded = await request(app.getHttpServer())
+        .get('/api/auth/me')
+        .auth(modToken, { type: 'bearer' })
+        .expect(200);
+      expect(downgraded.body.permissions).not.toContain('dashboard.view');
+      await request(app.getHttpServer())
+        .get('/api/statistics/platform')
+        .auth(modToken, { type: 'bearer' })
+        .expect(403);
+    } finally {
+      await db
+        .collection('users')
+        .updateOne(
+          { _id: new Types.ObjectId(modId) },
+          { $set: { role: 'MODERATOR' } },
+        );
+    }
+  });
+
+  it('requires unblocking a user before promotion to Moderator', async () => {
+    await request(app.getHttpServer())
+      .post(`/api/admin/users/${userId}/block`)
+      .auth(adminToken, { type: 'bearer' })
+      .expect(201);
+    try {
+      await request(app.getHttpServer())
+        .patch(`/api/admin/users/${userId}/role`)
+        .auth(adminToken, { type: 'bearer' })
+        .send({ role: 'MODERATOR' })
+        .expect(400);
+    } finally {
+      await request(app.getHttpServer())
+        .post(`/api/admin/users/${userId}/unblock`)
+        .auth(adminToken, { type: 'bearer' })
+        .expect(201);
+    }
+  });
+
+  it('uses Vietnam calendar days for personal upload statistics and validates ranges', async () => {
+    const offsetMs = 7 * 60 * 60 * 1000;
+    const today = new Date(Date.now() + offsetMs).toISOString().slice(0, 10);
+    const todayStart = new Date(
+      new Date(`${today}T00:00:00Z`).getTime() - offsetMs,
+    );
+    const yesterday = new Date(
+      todayStart.getTime() + offsetMs - 24 * 60 * 60 * 1000,
+    )
+      .toISOString()
+      .slice(0, 10);
+    const ids = [new Types.ObjectId(), new Types.ObjectId()];
+    await db.collection('documents').insertMany([
+      {
+        _id: ids[0],
+        uploader: new Types.ObjectId(userId),
+        uploadDate: new Date(todayStart.getTime() - 1),
+        downloadCount: 2,
+      },
+      {
+        _id: ids[1],
+        uploader: new Types.ObjectId(userId),
+        uploadDate: todayStart,
+        downloadCount: 3,
+      },
+    ]);
+    try {
+      const day = await request(app.getHttpServer())
+        .get('/api/users/me/upload-stats')
+        .query({ period: 'day' })
+        .auth(token, { type: 'bearer' })
+        .expect(200);
+      expect(day.body.totalDocuments).toBe(1);
+      expect(day.body.data).toEqual([
+        { date: today, count: 1, totalDownloads: 3 },
+      ]);
+
+      const custom = await request(app.getHttpServer())
+        .get('/api/users/me/upload-stats')
+        .query({ period: 'custom', fromDate: yesterday, toDate: today })
+        .auth(token, { type: 'bearer' })
+        .expect(200);
+      expect(custom.body.totalDocuments).toBe(2);
+      expect(custom.body.data).toEqual([
+        { date: yesterday, count: 1, totalDownloads: 2 },
+        { date: today, count: 1, totalDownloads: 3 },
+      ]);
+
+      for (const query of [
+        { period: 'unknown' },
+        { period: 'custom' },
+        { period: 'custom', fromDate: '2026-02-30' },
+        { period: 'custom', fromDate: today, toDate: yesterday },
+        { period: 'month', fromDate: today },
+      ]) {
+        await request(app.getHttpServer())
+          .get('/api/users/me/upload-stats')
+          .query(query)
+          .auth(token, { type: 'bearer' })
+          .expect(400);
+      }
+    } finally {
+      await db.collection('documents').deleteMany({ _id: { $in: ids } });
+    }
+  });
+
   it('validates dashboard upload trend ranges and returns a continuous series', async () => {
     for (const invalidDays of ['7abc', '0', '366']) {
       await request(app.getHttpServer())
@@ -697,7 +875,7 @@ describe('UniShare API with isolated MongoDB', () => {
       .expect(200);
   });
 
-  it('admin deletion removes the file and decrements the uploader count', async () => {
+  it('admin deletion removes the file and excludes it from the personal average', async () => {
     await request(app.getHttpServer())
       .delete('/api/admin/documents/' + documentId)
       .auth(adminToken, { type: 'bearer' })
@@ -708,7 +886,10 @@ describe('UniShare API with isolated MongoDB', () => {
       .get('/api/users/me/stats')
       .auth(token, { type: 'bearer' })
       .expect(200);
-    expect(stats.body.totalUploads).toBe(0);
+    // The thirteen raw fixtures remain, while the deleted upload does not.
+    expect(stats.body.totalUploads).toBe(13);
+    expect(stats.body.totalDownloads).toBeGreaterThan(0);
+    expect(stats.body.avgDownloadsPerDoc).toBe(6);
     const platform = await request(app.getHttpServer())
       .get('/api/statistics/platform')
       .auth(modToken, { type: 'bearer' })

@@ -10,6 +10,16 @@ const admin = {
 };
 
 test.beforeEach(async ({ page }) => {
+  await page.route("**/auth/me", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      userId: admin._id,
+      email: admin.email,
+      role: admin.role,
+      permissions: ["dashboard.view", "statistics.view", "reports.review", "users.list", "users.moderate", "documents.review", "documents.moderate", "users.reset_password", "users.delete", "users.assign_role", "admin.delegate", "documents.delete_any", "documents.generate_thumbnails", "audit.view", "catalog.manage"],
+    }),
+  }));
   await page.addInitScript((storedUser) => {
     window.localStorage.setItem("auth-storage", JSON.stringify({
       state: { user: storedUser, token: "test-jwt", isAuthenticated: true },

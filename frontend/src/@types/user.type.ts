@@ -8,6 +8,7 @@ export interface User {
   fullName: string;
   avatarUrl?: string;
   role: UserRole;
+  permissions?: string[];
   status: UserStatus;
   joinedDate: string;
   uploadsCount: number;

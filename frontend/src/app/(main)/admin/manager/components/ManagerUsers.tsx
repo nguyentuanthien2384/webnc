@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import Pagination from "@/components/common/Pagination";
 import { downloadExcel } from "@/lib/downloadExcel";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { hasPermission, ROLE_LABELS } from "@/lib/permissions";
 
 function ManageUsersContent() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,7 +36,11 @@ function ManageUsersContent() {
   const logout = useAuthStore((s) => s.clearSession);
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.user);
-  const isAdmin = currentUser?.role === "ADMIN";
+  const canAssignRoles = hasPermission(currentUser, "users.assign_role");
+  const canDelegateAdmin = hasPermission(currentUser, "admin.delegate");
+  const canModerateUsers = hasPermission(currentUser, "users.moderate");
+  const canResetPasswords = hasPermission(currentUser, "users.reset_password");
+  const canDeleteUsers = hasPermission(currentUser, "users.delete");
 
   const { data: usersData, isLoading, isError } = useAdminUsers(
     debouncedSearchTerm,
@@ -125,6 +130,14 @@ function ManageUsersContent() {
 
   return (
     <div>
+      <div className="mb-5 rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-sm text-slate-700">
+        <h3 className="font-semibold text-slate-900">Phân quyền tài khoản</h3>
+        <ul className="mt-2 grid gap-1 sm:grid-cols-3">
+          <li><strong>Thành viên:</strong> đăng, tải và quản lý tài liệu của mình; gửi báo cáo.</li>
+          <li><strong>Kiểm duyệt viên:</strong> thêm xử lý báo cáo, khóa tài liệu và tài khoản thành viên.</li>
+          <li><strong>Quản trị viên:</strong> thêm quản lý vai trò, danh mục, xóa dữ liệu, xem nhật ký và chuyển giao quyền.</li>
+        </ul>
+      </div>
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <input
           type="text"
@@ -218,7 +231,7 @@ function ManageUsersContent() {
                           : "bg-gray-100 text-gray-800"
                     }`}
                   >
-                    {user.role}
+                    {ROLE_LABELS[user.role]}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -243,7 +256,7 @@ function ManageUsersContent() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end gap-2 flex-wrap">
-                    {isAdmin && user.role === "USER" && (
+                    {canAssignRoles && user.role === "USER" && user.status === "ACTIVE" && (
                       <button
                         onClick={() =>
                           roleMutation.mutate({
@@ -256,7 +269,7 @@ function ManageUsersContent() {
                         Thăng cấp
                       </button>
                     )}
-                    {isAdmin && user.role === "MODERATOR" && (
+                    {canAssignRoles && user.role === "MODERATOR" && (
                       <>
                         <button
                           onClick={() =>
@@ -269,18 +282,18 @@ function ManageUsersContent() {
                         >
                           Giáng cấp
                         </button>
-                        <button
+                        {canDelegateAdmin && user.status === "ACTIVE" && <button
                           onClick={() =>
                             setModalState({ action: "delegate", user })
                           }
                           className="text-purple-600 hover:text-purple-900 hover:underline"
                         >
                           Ủy quyền Admin
-                        </button>
+                        </button>}
                       </>
                     )}
 
-                    {user.role === "USER" && (
+                    {canModerateUsers && user.role === "USER" && user._id !== currentUser?._id && (
                       <>
                         {user.status === "ACTIVE" ? (
                           <button
@@ -302,23 +315,21 @@ function ManageUsersContent() {
                           </button>
                         )}
 
-                        {isAdmin && <button
-                          onClick={() => handleResetPassword(user)}
-                          className="text-gray-600 hover:text-gray-900 hover:underline"
-                        >
-                          Reset Pass
-                        </button>}
-                        {isAdmin && (
-                          <button
-                            onClick={() =>
-                              setModalState({ action: "delete", user })
-                            }
-                            className="text-red-700 hover:text-red-900 hover:underline"
-                          >
-                            Xóa tài khoản
-                          </button>
-                        )}
                       </>
+                    )}
+                    {canResetPasswords && user.role !== "ADMIN" && user._id !== currentUser?._id && <button
+                      onClick={() => handleResetPassword(user)}
+                      className="text-gray-600 hover:text-gray-900 hover:underline"
+                    >
+                      Đặt lại mật khẩu
+                    </button>}
+                    {canDeleteUsers && user.role !== "ADMIN" && user._id !== currentUser?._id && (
+                      <button
+                        onClick={() => setModalState({ action: "delete", user })}
+                        className="text-red-700 hover:text-red-900 hover:underline"
+                      >
+                        Xóa tài khoản
+                      </button>
                     )}
                   </div>
                 </td>
@@ -356,7 +367,7 @@ function ManageUsersContent() {
 
 export default function ManageUsersProtected() {
   return (
-    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]}>
+    <RoleGuard allowedRoles={["ADMIN", "MODERATOR"]} requiredPermission="users.list">
       <ManageUsersContent />
     </RoleGuard>
   );

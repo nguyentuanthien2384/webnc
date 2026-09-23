@@ -21,6 +21,7 @@ import DeleteConfirmModal from "@/components/common/DeleteConfirmModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { getDocumentPreviewUrl } from "@/components/documents/DocumentPreview";
 import ReportDocumentModal from "./ReportDocumentModal";
+import { hasPermission } from "@/lib/permissions";
 
 interface DocumentCardProps {
   doc: Document;
@@ -87,7 +88,10 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
   const [isReportOpen, setIsReportOpen] = useState(false);
 
   const isOwner = user && doc.uploader?._id === user._id;
-  const canDelete = isOwner || user?.role === "ADMIN";
+  const canDeleteAnyDocument = hasPermission(user, "documents.delete_any");
+  const canDelete = (isOwner && hasPermission(user, "documents.delete_own")) || canDeleteAnyDocument;
+  const canDownload = hasPermission(user, "documents.download");
+  const canReport = hasPermission(user, "reports.create");
 
   const handlePreview = () => {
     window.open(getDocumentPreviewUrl(doc._id), "_blank", "noopener,noreferrer");
@@ -164,7 +168,7 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
     }
     const toastId = toast.loading("Đang xóa tài liệu...");
     try {
-      if (user?.role === "ADMIN" && !isOwner) {
+      if (canDeleteAnyDocument && !isOwner) {
         await api.delete(`/admin/documents/${doc._id}`);
       } else {
         await api.delete(`/documents/${doc._id}`);
@@ -191,8 +195,8 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
         doc={doc}
         onPreview={handlePreview}
         onShare={handleShare}
-        onDownload={handleDownload}
-        onReport={handleReport}
+        onDownload={canDownload ? handleDownload : undefined}
+        onReport={canReport ? handleReport : undefined}
         onDelete={canDelete ? () => setIsDeleteOpen(true) : undefined}
       />
     ) : (
@@ -200,8 +204,8 @@ export default function DocumentCard({ doc, viewMode }: DocumentCardProps) {
         doc={doc}
         onPreview={handlePreview}
         onShare={handleShare}
-        onDownload={handleDownload}
-        onReport={handleReport}
+        onDownload={canDownload ? handleDownload : undefined}
+        onReport={canReport ? handleReport : undefined}
         onDelete={canDelete ? () => setIsDeleteOpen(true) : undefined}
       />
     );
@@ -225,8 +229,8 @@ interface LayoutProps {
   doc: Document;
   onPreview: () => void;
   onShare: () => void;
-  onDownload: () => void;
-  onReport: () => void;
+  onDownload?: () => void;
+  onReport?: () => void;
   onDelete?: () => void;
 }
 
@@ -376,7 +380,7 @@ const DocumentMenu = ({
               </button>
             )}
           </Menu.Item>
-          <Menu.Item>
+          {onDownload && <Menu.Item>
             {({ active }) => (
               <button
                 onClick={onDownload}
@@ -386,7 +390,7 @@ const DocumentMenu = ({
                 Tải xuống
               </button>
             )}
-          </Menu.Item>
+          </Menu.Item>}
           <Menu.Item>
             {({ active }) => (
               <button
@@ -398,7 +402,7 @@ const DocumentMenu = ({
               </button>
             )}
           </Menu.Item>
-          <Menu.Item>
+          {onReport && <Menu.Item>
             {({ active }) => (
               <button
                 onClick={onReport}
@@ -408,7 +412,7 @@ const DocumentMenu = ({
                 Báo cáo
               </button>
             )}
-          </Menu.Item>
+          </Menu.Item>}
           {onDelete && (
             <>
               <div className="my-1 h-px bg-gray-100" />

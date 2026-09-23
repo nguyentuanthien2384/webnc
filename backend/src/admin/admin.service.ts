@@ -267,6 +267,15 @@ export class AdminService {
         'Admin chỉ được tạo bằng chức năng ủy quyền',
       );
     }
+    if (
+      user.role === UserRole.USER &&
+      role === UserRole.MODERATOR &&
+      user.status !== UserStatus.ACTIVE
+    ) {
+      throw new BadRequestException(
+        'Cần mở khóa tài khoản trước khi thăng cấp thành Moderator',
+      );
+    }
     if (user.role === role) {
       throw new BadRequestException('User đã có vai trò này');
     }
@@ -403,6 +412,12 @@ export class AdminService {
   ): Promise<{ message: string; newPassword?: string }> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
+
+    if (userId === actorId || user.role === UserRole.ADMIN) {
+      throw new ForbiddenException(
+        'Không thể reset mật khẩu của tài khoản Admin',
+      );
+    }
 
     const newPassword = randomBytes(12).toString('base64url');
     const hashedPassword = await bcrypt.hash(newPassword, 10);

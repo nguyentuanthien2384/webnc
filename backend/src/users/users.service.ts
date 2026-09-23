@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -16,6 +17,32 @@ import { LogsService } from '../logs/logs.service';
 import { StatisticsService } from '../statistics/statistics.service';
 import * as bcrypt from 'bcrypt';
 import { deleteDocumentFiles } from '../common/document-storage';
+
+const VIETNAM_UTC_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+function assertCalendarDate(value: string): void {
+  const date = new Date(`${value}T00:00:00Z`);
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== value
+  ) {
+    throw new BadRequestException(
+      'Ngày không hợp lệ. Dùng định dạng YYYY-MM-DD.',
+    );
+  }
+}
+
+function nextCalendarDate(value: string): string {
+  const date = new Date(`${value}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function vietnamDayStart(value: string): Date {
+  return new Date(
+    new Date(`${value}T00:00:00Z`).getTime() - VIETNAM_UTC_OFFSET_MS,
+  );
+}
 
 @Injectable()
 export class UsersService {
@@ -171,23 +198,42 @@ export class UsersService {
   }
 
   async getMyStats(userId: string) {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
     const userStats = await this.userModel
       .findById(userId)
-      .select('uploadsCount downloadsCount')
+      .select('downloadsCount')
       .lean();
 
     if (!userStats) {
       throw new NotFoundException('User not found');
     }
 
+    const documentTotals = await this.documentModel.aggregate<{
+      totalUploads: number;
+      currentDocumentDownloads: number;
+    }>([
+      { $match: { uploader: new Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: null,
+          totalUploads: { $sum: 1 },
+          currentDocumentDownloads: {
+            $sum: { $ifNull: ['$downloadCount', 0] },
+          },
+        },
+      },
+    ]);
+    const totalUploads = documentTotals[0]?.totalUploads ?? 0;
     const avgDownloads =
-      userStats.uploadsCount > 0
-        ? userStats.downloadsCount / userStats.uploadsCount
+      totalUploads > 0
+        ? (documentTotals[0]?.currentDocumentDownloads ?? 0) / totalUploads
         : 0;
 
     return {
-      totalUploads: userStats.uploadsCount,
-      totalDownloads: userStats.downloadsCount,
+      totalUploads,
+      totalDownloads: userStats.downloadsCount ?? 0,
       avgDownloadsPerDoc: parseFloat(avgDownloads.toFixed(2)),
     };
   }
@@ -198,42 +244,57 @@ export class UsersService {
     fromDate?: string,
     toDate?: string,
   ) {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+    if (!['day', 'month', 'year', 'all', 'custom'].includes(period)) {
+      throw new BadRequestException('Kỳ thống kê không hợp lệ.');
+    }
+    if (fromDate) assertCalendarDate(fromDate);
+    if (toDate) assertCalendarDate(toDate);
+    if (period !== 'custom' && (fromDate || toDate)) {
+      throw new BadRequestException(
+        'Chỉ kỳ tùy chọn mới nhận fromDate/toDate.',
+      );
+    }
+    if (period === 'custom' && !fromDate) {
+      throw new BadRequestException('Kỳ tùy chọn cần fromDate.');
+    }
+
     const documentsCollection = this.connection.collection('documents');
     const userObjectId = new Types.ObjectId(userId);
-
     const matchStage: Record<string, unknown> = { uploader: userObjectId };
+    const today = new Date(Date.now() + VIETNAM_UTC_OFFSET_MS)
+      .toISOString()
+      .slice(0, 10);
+    let startDay: string | undefined;
+    let endDay: string | undefined;
+    if (period === 'day') {
+      startDay = endDay = today;
+    } else if (period === 'month') {
+      startDay = `${today.slice(0, 7)}-01`;
+      endDay = today;
+    } else if (period === 'year') {
+      startDay = `${today.slice(0, 4)}-01-01`;
+      endDay = today;
+    } else if (period === 'custom') {
+      startDay = fromDate;
+      endDay = toDate ?? today;
+    }
 
-    if (period === 'custom' && fromDate) {
-      const dateFilter: Record<string, Date> = {
-        $gte: new Date(fromDate),
+    if (startDay && endDay) {
+      const dayCount = Math.round(
+        (new Date(`${endDay}T00:00:00Z`).getTime() -
+          new Date(`${startDay}T00:00:00Z`).getTime()) /
+          (24 * 60 * 60 * 1000),
+      );
+      if (dayCount < 0 || dayCount > 365) {
+        throw new BadRequestException('Khoảng ngày phải từ 1 đến 366 ngày.');
+      }
+      matchStage.uploadDate = {
+        $gte: vietnamDayStart(startDay),
+        $lt: vietnamDayStart(nextCalendarDate(endDay)),
       };
-      if (toDate) {
-        const end = new Date(toDate);
-        end.setHours(23, 59, 59, 999);
-        dateFilter.$lte = end;
-      }
-      matchStage.uploadDate = dateFilter;
-    } else if (period !== 'all') {
-      const now = new Date();
-      let startDate: Date;
-      switch (period) {
-        case 'day':
-          startDate = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate(),
-          );
-          break;
-        case 'month':
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-          break;
-        case 'year':
-          startDate = new Date(now.getFullYear(), 0, 1);
-          break;
-        default:
-          startDate = new Date(0);
-      }
-      matchStage.uploadDate = { $gte: startDate };
     }
 
     const results = await documentsCollection
@@ -242,7 +303,11 @@ export class UsersService {
         {
           $group: {
             _id: {
-              $dateToString: { format: '%Y-%m-%d', date: '$uploadDate' },
+              $dateToString: {
+                format: '%Y-%m-%d',
+                date: '$uploadDate',
+                timezone: 'Asia/Ho_Chi_Minh',
+              },
             },
             count: { $sum: 1 },
             totalDownloads: { $sum: '$downloadCount' },
@@ -266,11 +331,29 @@ export class UsersService {
       0,
     );
 
+    const countsByDate = new Map(
+      results.map((result) => [result.date as string, result]),
+    );
+    const data: typeof results = [];
+    if (startDay && endDay) {
+      for (let day = startDay; day <= endDay; day = nextCalendarDate(day)) {
+        data.push(
+          countsByDate.get(day) ?? {
+            date: day,
+            count: 0,
+            totalDownloads: 0,
+          },
+        );
+      }
+    } else {
+      data.push(...results);
+    }
+
     return {
       period,
       totalDocuments: totalCount,
       totalDownloads,
-      data: results,
+      data,
     };
   }
 }

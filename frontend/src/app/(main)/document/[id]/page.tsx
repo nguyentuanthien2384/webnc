@@ -18,6 +18,8 @@ import { toast } from "react-hot-toast";
 import Link from "next/link";
 import Image from "next/image";
 import DocumentPreview from "@/components/documents/DocumentPreview";
+import { useAuthStore } from "@/store/auth.store";
+import { hasPermission } from "@/lib/permissions";
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return bytes + " B";
@@ -46,6 +48,9 @@ export default function DocumentDetailPage() {
   const router = useRouter();
   const id = params.id as string;
   const { data: doc, isLoading, isError } = useDocumentDetail(id);
+  const user = useAuthStore((state) => state.user);
+  const canDownload = hasPermission(user, "documents.download");
+  const canManageDrafts = hasPermission(user, "drafts.manage_own");
 
   const handleDownload = async () => {
     if (!doc) return;
@@ -151,13 +156,13 @@ export default function DocumentDetailPage() {
 
           {/* Actions */}
           <div className="px-8 py-4 border-b border-gray-100 flex flex-wrap gap-3">
-            <button
+            {canDownload && <button
               onClick={handleDownload}
               className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium text-sm shadow-sm"
             >
               <ArrowDownTrayIcon className="w-5 h-5" />
               Tải xuống
-            </button>
+            </button>}
             <button
               onClick={handleShare}
               className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-medium text-sm"
@@ -165,10 +170,10 @@ export default function DocumentDetailPage() {
               <ShareIcon className="w-5 h-5" />
               Chia sẻ
             </button>
-            <Link href={`/editor?documentId=${doc._id}`} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium text-sm">
+            {canManageDrafts && <Link href={`/editor?documentId=${doc._id}`} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium text-sm">
               <PencilSquareIcon className="w-5 h-5" />
               Ghi chú riêng
-            </Link>
+            </Link>}
           </div>
 
           {/* Content */}

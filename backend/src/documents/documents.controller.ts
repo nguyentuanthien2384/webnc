@@ -27,6 +27,9 @@ import { UpdateDocumentDto } from './dto/update-document.dto';
 import { Types } from 'mongoose';
 import { extname } from 'path';
 import { CleanupFailedUploadInterceptor } from './cleanup-failed-upload.interceptor';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
+import { Permissions } from '../auth/decorators/permissions.decorator';
+import { Permission } from '../auth/permissions';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: { userId: string; email: string; role: string };
@@ -59,7 +62,8 @@ function setFileHeaders(
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @Permissions(Permission.DOCUMENTS_UPLOAD)
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'), CleanupFailedUploadInterceptor)
   uploadDocument(
@@ -104,16 +108,15 @@ export class DocumentsController {
     return this.documentsService.findUserDocuments(userId, queryDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @Permissions(Permission.DOCUMENTS_GENERATE_THUMBNAILS)
   @Post('generate-thumbnails')
-  generateThumbnails(@Request() req: AuthenticatedRequest) {
-    if (req.user.role !== 'ADMIN') {
-      throw new BadRequestException('Only admins can trigger this action');
-    }
+  generateThumbnails() {
     return this.documentsService.generateMissingThumbnails();
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @Permissions(Permission.DOCUMENTS_DOWNLOAD)
   @Get(':id/download')
   async downloadDocument(
     @Param('id') docId: string,
@@ -167,7 +170,8 @@ export class DocumentsController {
     return this.documentsService.findOne(docId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @Permissions(Permission.DOCUMENTS_UPDATE_OWN)
   @Patch(':id')
   update(
     @Param('id') docId: string,
@@ -181,7 +185,8 @@ export class DocumentsController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @Permissions(Permission.DOCUMENTS_DELETE_OWN)
   @Delete(':id')
   remove(@Param('id') docId: string, @Request() req: AuthenticatedRequest) {
     return this.documentsService.remove(docId, req.user.userId);

@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { StatisticsService } from '../statistics/statistics.service';
 import { LogsService } from '../logs/logs.service';
 import { User, UserStatus } from '../users/schemas/user.schema';
+import { getPermissionsForRole } from './permissions';
 
 @Injectable()
 export class AuthService {
@@ -97,6 +98,7 @@ export class AuthService {
         fullName: user.fullName,
         avatarUrl: user.avatarUrl,
         role: user.role,
+        permissions: getPermissionsForRole(user.role),
         status: user.status,
         joinedDate: (user as unknown as Record<string, unknown>).joinedDate,
         uploadsCount: user.uploadsCount,

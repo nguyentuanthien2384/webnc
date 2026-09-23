@@ -9,6 +9,20 @@ const admin = {
 };
 
 async function signInAs(page: Page, user: typeof admin) {
+  await page.route("**/auth/me", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      userId: user._id,
+      email: user.email,
+      role: user.role,
+      permissions: [
+        "documents.upload", "documents.update_own", "documents.delete_own", "documents.download", "reports.create", "drafts.manage_own",
+        ...(user.role === "USER" ? [] : ["dashboard.view", "statistics.view", "reports.review", "users.list", "users.moderate", "documents.review", "documents.moderate"]),
+        ...(user.role === "ADMIN" ? ["users.reset_password", "users.delete", "users.assign_role", "admin.delegate", "documents.delete_any", "audit.view", "catalog.manage", "documents.generate_thumbnails"] : []),
+      ],
+    }),
+  }));
   await page.addInitScript((storedUser) => {
     window.localStorage.setItem("auth-storage", JSON.stringify({
       state: { user: storedUser, token: "test-jwt", isAuthenticated: true },
@@ -153,9 +167,70 @@ test("liên kết báo cáo chờ xử lý mở đúng mục trong trang quản 
   await expect(page.getByRole("heading", { name: /Báo cáo tài liệu/ })).toBeVisible();
 });
 
-test("tài khoản thường không truy cập được dashboard quản trị", async ({ page }) => {
+test("USER chỉ thấy dashboard và dữ liệu của chính mình", async ({ page }) => {
   await signInAs(page, { ...admin, role: "USER" });
+  let platformRequests = 0;
+  let reportRequests = 0;
+  const requestedPeriods: string[] = [];
+  await page.route("**/statistics/**", (route) => {
+    platformRequests++;
+    return route.fulfill({ status: 403, contentType: "application/json", body: JSON.stringify({ message: "Forbidden" }) });
+  });
+  await page.route("**/reports?**", (route) => {
+    reportRequests++;
+    return route.fulfill({ status: 403, contentType: "application/json", body: JSON.stringify({ message: "Forbidden" }) });
+  });
+  await page.route("**/users/me/stats", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ totalUploads: 2, totalDownloads: 7, avgDownloadsPerDoc: 3.5 }),
+  }));
+  await page.route("**/users/me/upload-stats?**", (route) => {
+    const period = new URL(route.request().url()).searchParams.get("period") ?? "month";
+    requestedPeriods.push(period);
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ period, totalDocuments: 1, totalDownloads: 2, data: [{ date: "2026-09-21", count: 1 }] }),
+    });
+  });
+  await page.route("**/documents/my-uploads?**", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      data: [{ _id: "507f1f77bcf86cd799439014", title: "Tài liệu của tôi", uploadDate: "2026-09-20T10:00:00.000Z", downloadCount: 3 }],
+      pagination: { total: 1, page: 1, limit: 5, totalPages: 1 },
+    }),
+  }));
   await page.goto("/dashboard");
-  await expect(page).toHaveURL("http://127.0.0.1:3107/");
-  await expect(page.getByRole("heading", { name: /Chào Quản trị kiểm thử/ })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Hoạt động của bạn" })).toBeVisible();
+  await expect(page.getByText("Lượt tải tài liệu của tôi", { exact: true })).toBeVisible();
+  await expect(page.locator('a[href="/document/507f1f77bcf86cd799439014"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Số liệu tổng quan" })).toHaveCount(0);
+  await expect.poll(() => requestedPeriods).toContain("month");
+  await page.getByRole("button", { name: "Năm nay" }).click();
+  await expect.poll(() => requestedPeriods).toContain("year");
+  await expect(page.getByRole("button", { name: "Năm nay" })).toHaveAttribute("aria-pressed", "true");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => page.evaluate(() =>
+    document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  )).toBeLessThanOrEqual(0);
+  expect(platformRequests).toBe(0);
+  expect(reportRequests).toBe(0);
+});
+
+test("MODERATOR thấy công việc kiểm duyệt nhưng không thấy công cụ riêng của ADMIN", async ({ page }) => {
+  await signInAs(page, { ...admin, role: "MODERATOR" });
+  await mockDashboardData(page, 2);
+  await page.route("**/statistics/uploads-over-time**", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify([{ date: "2026-09-21", count: 1 }]),
+  }));
+
+  await page.goto("/dashboard");
+  await expect(page.getByRole("heading", { name: "Số liệu tổng quan" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Xử lý báo cáo/ })).toHaveAttribute("href", "/admin/manager?tab=reports");
+  await expect(page.getByRole("heading", { name: "Quản trị nền tảng" })).toHaveCount(0);
+  await expect(page.locator('a[href="/admin/manager?tab=logs"]')).toHaveCount(0);
 });

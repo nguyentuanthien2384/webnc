@@ -47,6 +47,7 @@ describe('UsersService', () => {
 
     documentModel = jest.fn();
     documentModel.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 0 });
+    documentModel.aggregate = jest.fn().mockResolvedValue([]);
 
     logsService = {
       createLog: jest.fn().mockResolvedValue(undefined),
@@ -257,7 +258,7 @@ describe('UsersService', () => {
   });
 
   describe('getMyStats', () => {
-    it('should return user statistics', async () => {
+    it('uses current documents for count and average but keeps lifetime downloads', async () => {
       const statsUser = { uploadsCount: 10, downloadsCount: 50 };
       const query = {
         select: jest.fn().mockReturnValue({
@@ -265,18 +266,33 @@ describe('UsersService', () => {
         }),
       };
       userModel.findById.mockReturnValue(query);
+      documentModel.aggregate.mockResolvedValue([
+        { totalUploads: 2, currentDocumentDownloads: 3 },
+      ]);
 
       const result = await service.getMyStats(mockUser._id);
 
       expect(result).toEqual({
-        totalUploads: 10,
+        totalUploads: 2,
         totalDownloads: 50,
-        avgDownloadsPerDoc: 5,
+        avgDownloadsPerDoc: 1.5,
       });
+      expect(documentModel.aggregate).toHaveBeenCalledWith([
+        { $match: { uploader: expect.anything() } },
+        {
+          $group: {
+            _id: null,
+            totalUploads: { $sum: 1 },
+            currentDocumentDownloads: {
+              $sum: { $ifNull: ['$downloadCount', 0] },
+            },
+          },
+        },
+      ]);
     });
 
     it('should handle zero uploads (avoid division by zero)', async () => {
-      const statsUser = { uploadsCount: 0, downloadsCount: 0 };
+      const statsUser = { uploadsCount: 4, downloadsCount: 8 };
       const query = {
         select: jest.fn().mockReturnValue({
           lean: jest.fn().mockResolvedValue(statsUser),
@@ -286,6 +302,8 @@ describe('UsersService', () => {
 
       const result = await service.getMyStats(mockUser._id);
 
+      expect(result.totalUploads).toBe(0);
+      expect(result.totalDownloads).toBe(8);
       expect(result.avgDownloadsPerDoc).toBe(0);
     });
 
@@ -297,9 +315,9 @@ describe('UsersService', () => {
       };
       userModel.findById.mockReturnValue(query);
 
-      await expect(service.getMyStats('nonexistent')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.getMyStats('507f1f77bcf86cd799439012'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

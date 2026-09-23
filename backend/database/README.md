@@ -5,6 +5,30 @@ collection, ở định dạng **Canonical Extended JSON** của MongoDB — ki�
 và `Date` được giữ nguyên, nên quan hệ khoá ngoại giữa các collection không bị vỡ
 sau khi import.
 
+## Thiết lập an toàn trên máy mới
+
+Đặt `DATABASE_URL=mongodb://127.0.0.1:27017/unishare` trong `backend/.env`, rồi chạy
+các lệnh sau trong thư mục `backend` khi database còn trống:
+
+```bash
+npm install
+npm run db:import
+npm run db:restore-files
+npm run db:sync-demo-file-sizes -- --apply
+npm run db:seed-demo-extras
+npm run db:verify
+```
+
+Nếu database đã có dữ liệu, bỏ qua `db:import`. Script này dừng trước khi ghi nếu
+bất kỳ collection trong dump đã có bản ghi. `db:restore-files` chỉ tạo file PDF mẫu
+và thumbnail còn thiếu; `db:sync-demo-file-sizes` chỉ sửa kích thước của các PDF
+mẫu khi có `--apply`. `db:seed-demo-extras` chỉ bổ sung một báo cáo đang chờ xử lý
+và một bản nháp để thử các chức năng mới, chạy lại không tạo bản sao.
+
+`db:verify` chỉ đọc dữ liệu và kiểm tra tài khoản mẫu, quan hệ, PDF, thumbnail và
+kích thước file. Bộ `dump/` gồm 84 bản ghi thuộc sáu collection; báo cáo và bản
+nháp mẫu được tạo riêng bởi `db:seed-demo-extras`.
+
 ## Nội dung
 
 | Collection      | Số bản ghi | Ghi chú                                              |
@@ -98,6 +122,13 @@ npm run db:restore-files
 
 Script đọc `documents` trong DB, sinh lại các file PDF mẫu còn thiếu và ảnh
 thumbnail tương ứng. File đã có sẵn thì không bị đụng tới.
+
+Nếu PDF mẫu được tạo lại, đồng bộ `fileSize` trong database với kích thước thực:
+
+```bash
+npm run db:sync-demo-file-sizes              # xem trước, không ghi
+npm run db:sync-demo-file-sizes -- --apply   # cập nhật metadata PDF mẫu
+```
 
 ## Xuất lại dump
 

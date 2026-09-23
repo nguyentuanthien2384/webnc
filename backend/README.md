@@ -13,6 +13,14 @@ npm run start:dev
 
 Mặc định API ở `http://localhost:8000/api`. Để tạo quản trị viên lần đầu, đặt `ADMIN_PASSWORD` mạnh, dài ít nhất 12 ký tự trong `.env`, rồi chạy `npm run seed:admin`. Script không thay đổi mật khẩu của tài khoản đã tồn tại; nếu từng dùng mật khẩu mẫu cũ, hãy đổi mật khẩu đó trước khi triển khai.
 
+## Dữ liệu thử MongoDB
+
+Với database trống, chạy `npm run db:import`, `npm run db:restore-files`,
+`npm run db:sync-demo-file-sizes -- --apply`, `npm run db:seed-demo-extras`, rồi
+`npm run db:verify`. Nếu database đã có dữ liệu, bỏ qua bước import để giữ các
+bản ghi hiện tại. Xem [hướng dẫn database](database/README.md) để biết chi tiết
+và tài khoản mẫu. Tránh chạy các lệnh có `--drop` trên database đang sử dụng.
+
 ## Chức năng
 
 - Đăng ký bằng email sinh viên Phenikaa, đăng nhập JWT, đăng xuất thu hồi token, đổi mật khẩu, sửa/xóa tài khoản.

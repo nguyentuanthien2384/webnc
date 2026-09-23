@@ -63,6 +63,7 @@ export default function JsonBlockEditor() {
   const [draftPage, setDraftPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [hasConflict, setHasConflict] = useState(false);
 
   const refreshDrafts = useCallback(async (page: number) => {
     if (!isAuthenticated) return;
@@ -124,7 +125,6 @@ export default function JsonBlockEditor() {
     if (!isReady || !isAuthenticated) return;
     const documentId = new URLSearchParams(window.location.search).get("documentId");
     if (!documentId) return;
-    setSourceDocumentId(documentId);
     void api.get(`/editor/drafts/for-document/${documentId}`).then(async (response) => {
       const draft = response.data as Draft;
       const local = getLocalDraft(userId);
@@ -135,9 +135,12 @@ export default function JsonBlockEditor() {
       setTitle(draft.title);
       setDraftId(draft._id);
       setDraftVersion(draft.version);
+      setSourceDocumentId(documentId);
+      setHasConflict(false);
       window.localStorage.setItem(draftKey(userId), JSON.stringify(draft.content));
     }).catch((error) => {
-      if (getApiErrorStatus(error) !== 404) toast.error(getApiErrorMessage(error, "Không thể tải ghi chú."));
+      if (getApiErrorStatus(error) === 404) setSourceDocumentId(documentId);
+      else toast.error(getApiErrorMessage(error, "Không thể tải ghi chú."));
     });
   }, [isReady, isAuthenticated, userId]);
 
@@ -152,6 +155,7 @@ export default function JsonBlockEditor() {
       setDraftId(draft._id);
       setDraftVersion(draft.version);
       setSourceDocumentId(draft.sourceDocument ?? null);
+      setHasConflict(false);
       window.localStorage.setItem(draftKey(userId), JSON.stringify(draft.content));
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Không thể mở bản nháp."));
@@ -174,10 +178,34 @@ export default function JsonBlockEditor() {
       setDraftId(saved._id);
       setDraftVersion(saved.version);
       setOutput(content);
+      setHasConflict(false);
       await refreshDrafts(1);
       toast.success("Đã lưu bản nháp vào tài khoản.");
     } catch (error) {
+      if (draftId && getApiErrorStatus(error) === 409) setHasConflict(true);
       toast.error(getApiErrorMessage(error, "Không thể lưu bản nháp."));
+    } finally { setSaving(false); }
+  };
+
+  const saveCopy = async () => {
+    if (!isAuthenticated || !editorRef.current || saving) return;
+    setSaving(true);
+    try {
+      const content = await editorRef.current.save();
+      const suffix = " (bản sao)";
+      const copyTitle = `${(title.trim() || "Bản nháp").slice(0, 120 - suffix.length)}${suffix}`;
+      const response = await api.post("/editor/drafts", { title: copyTitle, content });
+      const saved = response.data as Draft;
+      setTitle(saved.title);
+      setDraftId(saved._id);
+      setDraftVersion(saved.version);
+      setSourceDocumentId(null);
+      setOutput(content);
+      setHasConflict(false);
+      await refreshDrafts(1);
+      toast.success("Đã lưu nội dung hiện tại thành bản sao mới.");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Không thể lưu bản sao."));
     } finally { setSaving(false); }
   };
 
@@ -189,6 +217,7 @@ export default function JsonBlockEditor() {
     setDraftId(null);
     setDraftVersion(0);
     setSourceDocumentId(null);
+    setHasConflict(false);
     window.localStorage.setItem(draftKey(userId), JSON.stringify(emptyData));
   };
 
@@ -202,6 +231,7 @@ export default function JsonBlockEditor() {
       setDraftId(null);
       setDraftVersion(0);
       setSourceDocumentId(null);
+      setHasConflict(false);
       window.localStorage.setItem(draftKey(userId), JSON.stringify(emptyData));
       await refreshDrafts(1);
       toast.success("Đã xóa bản nháp.");
@@ -230,7 +260,7 @@ export default function JsonBlockEditor() {
         <div>
           <p className="text-sm font-semibold text-blue-600">Công cụ nội dung</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-gray-900">Soạn thảo và chuyển JSON</h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-500">Nội dung tự lưu trên thiết bị. Đăng nhập và chọn “Lưu vào tài khoản” để đồng bộ bản nháp trên máy chủ.</p>
+          <p className="mt-2 max-w-2xl text-sm text-gray-500">Nội dung tự lưu trên thiết bị. Chọn “Lưu vào tài khoản” để đồng bộ bản nháp trên máy chủ.</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <button type="button" onClick={handleCopy} disabled={!isReady} className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm disabled:opacity-50"><ClipboardDocumentIcon className="h-4 w-4" />Sao chép JSON</button>
@@ -249,6 +279,7 @@ export default function JsonBlockEditor() {
           {draftId && <button type="button" onClick={() => void deleteDraft()} className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-700">Xóa bản nháp</button>}
         </div>
         {sourceDocumentId && <p className="mt-3 text-sm text-gray-600">Ghi chú riêng cho <Link href={`/document/${sourceDocumentId}`} className="font-medium text-blue-600 hover:underline">tài liệu này</Link>.</p>}
+        {hasConflict && <div role="alert" className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"><p>Bản nháp đã được sửa ở nơi khác. Nội dung trên thiết bị này vẫn còn; bạn có thể lưu thành bản sao riêng.</p><button type="button" onClick={() => void saveCopy()} disabled={saving} className="mt-2 rounded-lg bg-amber-700 px-3 py-2 font-semibold text-white disabled:opacity-50">Lưu thành bản sao</button></div>}
         {!isAuthenticated && <p className="mt-3 text-sm text-amber-700"><Link href="/login" className="font-semibold underline">Đăng nhập</Link> để lưu bản nháp vào tài khoản. Nội dung hiện chỉ nằm trên thiết bị này.</p>}
       </section>
 

@@ -74,7 +74,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (_hasHydrated && isAuthenticated) {
-      router.replace("/");
+      const requested = new URLSearchParams(window.location.search).get("next");
+      const destination = requested && requested.startsWith("/") && !requested.startsWith("//") && !requested.includes("\\") && !requested.startsWith("/login")
+        ? requested
+        : "/";
+      router.replace(destination);
     }
   }, [isAuthenticated, _hasHydrated, router]);
 

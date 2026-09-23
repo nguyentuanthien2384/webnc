@@ -16,7 +16,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // Nếu đã khôi phục xong VÀ không đăng nhập -> đá về /login
     if (!isAuthenticated) {
-      router.replace("/login");
+      const destination = window.location.pathname + window.location.search + window.location.hash;
+      router.replace(`/login?next=${encodeURIComponent(destination)}`);
     }
   }, [_hasHydrated, isAuthenticated, router]); // Dependencies
 

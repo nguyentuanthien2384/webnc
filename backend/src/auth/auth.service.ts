@@ -118,13 +118,4 @@ export class AuthService {
     }
     return { message: 'Đăng xuất thành công' };
   }
-
-  forgotPassword(): { message: string } {
-    // Email delivery and ownership verification are not configured yet.
-    // Never change credentials or return a password to an anonymous caller.
-    return {
-      message:
-        'Vui lòng liên hệ quản trị viên để xác minh danh tính và hỗ trợ đặt lại mật khẩu.',
-    };
-  }
 }

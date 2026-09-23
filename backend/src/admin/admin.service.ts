@@ -198,6 +198,12 @@ export class AdminService {
     });
     const deletedUser = await this.userModel.findByIdAndDelete(userId);
     if (!deletedUser) throw new NotFoundException('User not found');
+    await this.userModel.db
+      .collection('editor_drafts')
+      .deleteMany({ owner: user._id });
+    await this.userModel.db
+      .collection('password_reset_tokens')
+      .deleteMany({ user: user._id });
     await Promise.all(files.map((doc) => deleteDocumentFiles(doc)));
     if (user.status === UserStatus.ACTIVE) {
       await this.statisticsService.incrementActiveUsers(-1);

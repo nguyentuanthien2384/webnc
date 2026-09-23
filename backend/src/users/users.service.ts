@@ -154,6 +154,12 @@ export class UsersService {
       `Xóa tài khoản ${user.fullName} (${user.email}) và toàn bộ tài liệu`,
     );
     await this.userModel.findByIdAndDelete(userId);
+    await this.connection
+      .collection('editor_drafts')
+      .deleteMany({ owner: user._id });
+    await this.connection
+      .collection('password_reset_tokens')
+      .deleteMany({ user: user._id });
     await Promise.all(files.map((doc) => deleteDocumentFiles(doc)));
     if (user.status === UserStatus.ACTIVE) {
       await this.statisticsService.incrementActiveUsers(-1);

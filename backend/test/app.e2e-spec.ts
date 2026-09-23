@@ -8,6 +8,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/configure-app';
+import { MailService } from '../src/auth/mail.service';
 import {
   deleteDocumentFiles,
   resolveUploadPath,
@@ -26,6 +27,8 @@ describe('UniShare API with isolated MongoDB', () => {
   let reportId: string;
   let uploadedPath: string;
   let thumbnailPath: string;
+  const emailOutbox: Array<{ to: string; url: string }> = [];
+  let mailConfigured = true;
   const ownedFiles: Array<{
     filePath?: string;
     fileUrl?: string;
@@ -56,7 +59,16 @@ describe('UniShare API with isolated MongoDB', () => {
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue({
+        isConfigured: () => mailConfigured,
+        sendPasswordReset: (to: string, url: string) => {
+          emailOutbox.push({ to, url });
+          return Promise.resolve();
+        },
+      })
+      .compile();
     app = module.createNestApplication();
     configureApp(app);
     await app.init();
@@ -150,18 +162,36 @@ describe('UniShare API with isolated MongoDB', () => {
     expect(me.body.password).toBeUndefined();
   });
 
-  it('does not disclose or change passwords through forgot-password', async () => {
+  it('does not disclose accounts through forgot-password', async () => {
+    const messages: string[] = [];
     for (const email of [user.email, 'absent@st.phenikaa-uni.edu.vn']) {
       const response = await request(app.getHttpServer())
         .post('/api/auth/forgot-password')
         .send({ email })
         .expect(200);
       expect(Object.keys(response.body)).toEqual(['message']);
+      messages.push(response.body.message);
     }
+    expect(messages[0]).toBe(messages[1]);
+    expect(emailOutbox).toHaveLength(1);
+    expect(emailOutbox[0].to).toBe(user.email);
     await request(app.getHttpServer())
       .post('/api/auth/forgot-password')
       .send({ email: {} })
       .expect(400);
+    token = await login(user);
+  });
+
+  it('reports unavailable email service without changing passwords', async () => {
+    mailConfigured = false;
+    try {
+      await request(app.getHttpServer())
+        .post('/api/auth/forgot-password')
+        .send({ email: user.email })
+        .expect(503);
+    } finally {
+      mailConfigured = true;
+    }
     token = await login(user);
   });
 
@@ -364,6 +394,77 @@ describe('UniShare API with isolated MongoDB', () => {
     await request(app.getHttpServer())
       .get(`/uploads/thumbnails/qa-${documentId}.png`)
       .expect(404);
+  });
+
+  it('saves private editor drafts linked to documents with version checks', async () => {
+    const content = {
+      blocks: [{ type: 'paragraph', data: { text: 'Ghi chú QA' } }],
+    };
+    await request(app.getHttpServer()).get('/api/editor/drafts').expect(401);
+    const created = await request(app.getHttpServer())
+      .post('/api/editor/drafts')
+      .auth(token, { type: 'bearer' })
+      .send({
+        title: 'Bản nháp của tôi',
+        content,
+        sourceDocumentId: documentId,
+      })
+      .expect(201);
+    const id = created.body._id as string;
+    expect(created.body.version).toBe(0);
+    await request(app.getHttpServer())
+      .get(`/api/editor/drafts/${id}`)
+      .auth(modToken, { type: 'bearer' })
+      .expect(404);
+    await request(app.getHttpServer())
+      .patch(`/api/editor/drafts/${id}`)
+      .auth(modToken, { type: 'bearer' })
+      .send({ version: 0, title: 'Stolen' })
+      .expect(404);
+    const linked = await request(app.getHttpServer())
+      .get(`/api/editor/drafts/for-document/${documentId}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(linked.body._id).toBe(id);
+    const list = await request(app.getHttpServer())
+      .get('/api/editor/drafts?page=1')
+      .auth(token, { type: 'bearer' })
+      .expect(200);
+    expect(list.body.pagination.total).toBe(1);
+    expect(list.body.data[0].content).toBeUndefined();
+    const updated = await request(app.getHttpServer())
+      .patch(`/api/editor/drafts/${id}`)
+      .auth(token, { type: 'bearer' })
+      .send({ version: 0, title: 'Đã sửa', content })
+      .expect(200);
+    expect(updated.body.version).toBe(1);
+    await request(app.getHttpServer())
+      .patch(`/api/editor/drafts/${id}`)
+      .auth(token, { type: 'bearer' })
+      .send({ version: 0, title: 'Bản cũ' })
+      .expect(409);
+    await request(app.getHttpServer())
+      .post('/api/editor/drafts')
+      .auth(token, { type: 'bearer' })
+      .send({
+        title: 'Bad',
+        content: { blocks: [{ type: 'script', data: {} }] },
+      })
+      .expect(400);
+    await request(app.getHttpServer())
+      .post('/api/editor/drafts')
+      .auth(token, { type: 'bearer' })
+      .send({ title: '   ', content })
+      .expect(400);
+    await request(app.getHttpServer())
+      .patch(`/api/editor/drafts/${id}`)
+      .auth(token, { type: 'bearer' })
+      .send({ version: 1 })
+      .expect(400);
+    await request(app.getHttpServer())
+      .delete(`/api/editor/drafts/${id}`)
+      .auth(token, { type: 'bearer' })
+      .expect(200);
   });
 
   it('filters personal documents before pagination and sorts by download count', async () => {
@@ -603,6 +704,11 @@ describe('UniShare API with isolated MongoDB', () => {
       .send(removable)
       .expect(201);
     const removableToken = await login(removable);
+    await request(app.getHttpServer())
+      .post('/api/editor/drafts')
+      .auth(removableToken, { type: 'bearer' })
+      .send({ title: 'Sẽ xóa', content: { blocks: [] } })
+      .expect(201);
     const upload = await request(app.getHttpServer())
       .post('/api/documents/upload')
       .auth(removableToken, { type: 'bearer' })
@@ -642,9 +748,89 @@ describe('UniShare API with isolated MongoDB', () => {
       .expect(200);
     expect(existsSync(filePath)).toBe(false);
     expect(existsSync(extraThumbnailPath)).toBe(false);
+    expect(
+      await db
+        .collection('editor_drafts')
+        .countDocuments({ owner: new Types.ObjectId(registration.body._id) }),
+    ).toBe(0);
+  });
+
+  it('recovers a password with a one-time expiring email link', async () => {
+    const recoveryUser = {
+      email: 'qa-recovery@st.phenikaa-uni.edu.vn',
+      password: 'Originalpass123!',
+      fullName: 'QA Recovery',
+    };
+    const registered = await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send(recoveryUser)
+      .expect(201);
+    const oldToken = await login(recoveryUser);
+    const before = emailOutbox.length;
+    const response = await request(app.getHttpServer())
+      .post('/api/auth/forgot-password')
+      .send({ email: recoveryUser.email })
+      .expect(200);
+    expect(Object.keys(response.body)).toEqual(['message']);
+    expect(emailOutbox).toHaveLength(before + 1);
+    const url = new URL(emailOutbox[before].url);
+    expect(url.pathname).toBe('/reset-password');
+    const resetToken = url.searchParams.get('token');
+    expect(resetToken).toBeTruthy();
+    await request(app.getHttpServer())
+      .post('/api/auth/forgot-password')
+      .send({ email: recoveryUser.email })
+      .expect(200);
+    expect(emailOutbox).toHaveLength(before + 1);
+    await request(app.getHttpServer())
+      .post('/api/auth/reset-password')
+      .send({ token: resetToken, newPassword: 'short' })
+      .expect(400);
+    await request(app.getHttpServer())
+      .post('/api/auth/reset-password')
+      .send({ token: resetToken, newPassword: 'Recoveredpass123!' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .get('/api/auth/me')
+      .auth(oldToken, { type: 'bearer' })
+      .expect(401);
+    await request(app.getHttpServer())
+      .post('/api/auth/reset-password')
+      .send({ token: resetToken, newPassword: 'Againpass123!' })
+      .expect(400);
+    await request(app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email: recoveryUser.email, password: 'Recoveredpass123!' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post('/api/auth/forgot-password')
+      .send({ email: recoveryUser.email })
+      .expect(200);
+    const expiredToken = new URL(emailOutbox.at(-1)!.url).searchParams.get(
+      'token',
+    );
+    await db
+      .collection('password_reset_tokens')
+      .updateOne(
+        { user: new Types.ObjectId(registered.body._id) },
+        { $set: { expiresAt: new Date(0) } },
+      );
+    await request(app.getHttpServer())
+      .post('/api/auth/reset-password')
+      .send({ token: expiredToken, newPassword: 'Expiredpass123!' })
+      .expect(400);
+    await request(app.getHttpServer())
+      .delete(`/api/admin/users/${registered.body._id}`)
+      .auth(adminToken, { type: 'bearer' })
+      .expect(200);
   });
 
   it('deletes only the authenticated user account and requires the password', async () => {
+    await request(app.getHttpServer())
+      .post('/api/editor/drafts')
+      .auth(token, { type: 'bearer' })
+      .send({ title: 'Bản nháp cá nhân', content: { blocks: [] } })
+      .expect(201);
     const ownThumbnailPath = `uploads/thumbnails/qa-own-${userId}.png`;
     await writeFile(ownThumbnailPath, Buffer.from('89504e470d0a1a0a', 'hex'));
     ownedFiles.push({ thumbnailPath: ownThumbnailPath });
@@ -679,5 +865,10 @@ describe('UniShare API with isolated MongoDB', () => {
         .countDocuments({ uploader: new Types.ObjectId(userId) }),
     ).toBe(0);
     expect(existsSync(ownThumbnailPath)).toBe(false);
+    expect(
+      await db
+        .collection('editor_drafts')
+        .countDocuments({ owner: new Types.ObjectId(userId) }),
+    ).toBe(0);
   });
 });

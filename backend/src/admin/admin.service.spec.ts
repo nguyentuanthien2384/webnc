@@ -78,6 +78,11 @@ describe('AdminService', () => {
     userModel.find = jest.fn().mockReturnValue(createChainableMock([mockUser]));
     userModel.countDocuments = jest.fn().mockResolvedValue(1);
     userModel.updateOne = jest.fn().mockResolvedValue({ modifiedCount: 1 });
+    userModel.db = {
+      collection: jest.fn().mockReturnValue({
+        deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
+      }),
+    };
 
     documentModel = jest.fn();
     documentModel.findById = jest

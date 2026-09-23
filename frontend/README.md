@@ -11,4 +11,4 @@ npm run dev
 
 Mở `http://localhost:3000`. Để kiểm tra trước khi triển khai, chạy `npm run lint` và `npm run build`. Tài khoản quản trị đầu tiên được tạo ở backend bằng `npm run seed:admin` sau khi đặt `ADMIN_PASSWORD` an toàn.
 
-Giao diện hỗ trợ tìm kiếm/lọc tài liệu, tải nhiều tài liệu với trạng thái từng tệp, trang hồ sơ, báo cáo tài liệu và quản trị có phân trang. Nếu quên mật khẩu, hãy liên hệ quản trị viên; ứng dụng chưa có khôi phục qua email.
+Giao diện hỗ trợ tìm kiếm/lọc tài liệu, tải nhiều tài liệu với trạng thái từng tệp, trang hồ sơ, báo cáo tài liệu và quản trị có phân trang. Người dùng có thể yêu cầu email khôi phục mật khẩu; backend phải được cấu hình SMTP trước khi dùng luồng này. Trình soạn thảo lưu bản nháp riêng vào tài khoản và có thể gắn ghi chú với một tài liệu, bên cạnh sao lưu cục bộ/xuất JSON.

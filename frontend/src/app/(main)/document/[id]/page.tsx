@@ -11,6 +11,7 @@ import {
   AcademicCapIcon,
   ClockIcon,
   ShareIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import api from "@/lib/axios";
 import { toast } from "react-hot-toast";
@@ -164,6 +165,10 @@ export default function DocumentDetailPage() {
               <ShareIcon className="w-5 h-5" />
               Chia sẻ
             </button>
+            <Link href={`/editor?documentId=${doc._id}`} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium text-sm">
+              <PencilSquareIcon className="w-5 h-5" />
+              Ghi chú riêng
+            </Link>
           </div>
 
           {/* Content */}

@@ -8,6 +8,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { StatisticsModule } from '../statistics/statistics.module';
 import { LogsModule } from '../logs/logs.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from '../users/schemas/user.schema';
+import {
+  PasswordResetToken,
+  PasswordResetTokenSchema,
+} from './schemas/password-reset-token.schema';
+import { MailService } from './mail.service';
+import { PasswordRecoveryService } from './password-recovery.service';
 
 @Module({
   imports: [
@@ -15,6 +23,10 @@ import { LogsModule } from '../logs/logs.module';
     PassportModule,
     StatisticsModule,
     LogsModule,
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: PasswordResetToken.name, schema: PasswordResetTokenSchema },
+    ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -25,7 +37,7 @@ import { LogsModule } from '../logs/logs.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, MailService, PasswordRecoveryService],
   exports: [AuthService],
 })
 export class AuthModule {}

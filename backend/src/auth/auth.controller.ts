@@ -13,6 +13,8 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { PasswordRecoveryService } from './password-recovery.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as ExpressRequest } from 'express';
 
@@ -22,7 +24,10 @@ interface AuthenticatedRequest extends ExpressRequest {
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private passwordRecovery: PasswordRecoveryService,
+  ) {}
 
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
@@ -48,9 +53,14 @@ export class AuthController {
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  forgotPassword(@Body() _dto: ForgotPasswordDto) {
-    void _dto;
-    return this.authService.forgotPassword();
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.passwordRecovery.request(dto.email);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.passwordRecovery.reset(dto);
   }
 
   @UseGuards(AuthGuard('jwt'))

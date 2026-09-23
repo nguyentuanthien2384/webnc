@@ -18,11 +18,20 @@ Mặc định API ở `http://localhost:8000/api`. Để tạo quản trị viê
 - Đăng ký bằng email sinh viên Phenikaa, đăng nhập JWT, đăng xuất thu hồi token, đổi mật khẩu, sửa/xóa tài khoản.
 - Tải lên, tìm kiếm, lọc và phân trang tài liệu; xem trước, tải xuống, chỉnh sửa và xóa tài liệu theo quyền sở hữu.
 - Báo cáo tài liệu; quản trị viên/điều hành viên xem và xử lý báo cáo.
+- Khôi phục mật khẩu qua email với liên kết dùng một lần, hết hạn sau 15 phút; bản nháp trình soạn thảo riêng tư có thể gắn với tài liệu.
 - Quản trị người dùng, tài liệu, môn/ngành học; thống kê và nhật ký hoạt động.
 
 Tệp tài liệu không được phục vụ trực tiếp qua `/uploads`. Truy cập qua các endpoint `/api/documents/:id/preview`, `/download` và `/thumbnail` để kiểm tra trạng thái tài liệu và quyền truy cập. Nếu đang dùng dữ liệu cũ với URL thumbnail dạng `/uploads/thumbnails/...`, chạy `npm run generate:thumbnails` một lần sau khi sao lưu dữ liệu để chuyển sang URL mới và tạo các ảnh còn thiếu.
 
-`POST /api/auth/forgot-password` không tự đặt lại mật khẩu: hiện chưa tích hợp email xác minh nên người dùng cần liên hệ quản trị viên. Endpoint trả cùng một thông báo cho email có hoặc không có tài khoản. Quản trị viên có thể dùng chức năng đặt lại mật khẩu trong trang quản trị.
+## Gửi email khôi phục mật khẩu
+
+Đặt `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM` và nếu máy chủ yêu cầu xác thực, đặt thêm `SMTP_USER` cùng `SMTP_PASSWORD` trong `backend/.env`. Cổng 465 dùng TLS trực tiếp; các cổng khác mặc định yêu cầu STARTTLS (`SMTP_REQUIRE_TLS=true`). `FRONTEND_URL` phải trỏ đến giao diện mà người dùng mở được. Không đặt thông tin SMTP vào `frontend/.env.local` và không commit mật khẩu.
+
+Khi chưa cấu hình SMTP, `POST /api/auth/forgot-password` trả 503 và hướng dẫn liên hệ quản trị viên; hệ thống không tạo liên kết giả hoặc đổi mật khẩu. Khi đã cấu hình, endpoint luôn trả cùng một thông báo cho email có hoặc không có tài khoản, và giới hạn mỗi tài khoản một email/phút. Liên kết dẫn đến `/reset-password`; `POST /api/auth/reset-password` nhận token và mật khẩu mới. Sau khi đổi, mọi phiên JWT cũ hết hiệu lực. Kiểm thử e2e thay SMTP bằng hộp thư giả, nên không gửi email thật.
+
+## Bản nháp trình soạn thảo
+
+Người dùng đăng nhập có thể lưu bản nháp riêng qua `/api/editor/drafts`, mở lại, cập nhật và xóa; chỉ chủ sở hữu truy cập được. Từ trang chi tiết tài liệu, nút **Ghi chú riêng** tạo/mở một bản nháp gắn với tài liệu đó. Nội dung vẫn được sao lưu tạm trên trình duyệt, còn nút **Lưu vào tài khoản** ghi lên máy chủ. Bản nháp không được công khai như một tài liệu tải lên.
 
 ## Kiểm tra
 

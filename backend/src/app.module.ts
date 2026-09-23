@@ -9,6 +9,7 @@ import { StatisticsModule } from './statistics/statistics.module';
 import { LogsModule } from './logs/logs.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ReportsModule } from './reports/reports.module';
+import { EditorModule } from './editor/editor.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ReportsModule } from './reports/reports.module';
     LogsModule,
     CategoriesModule,
     ReportsModule,
+    EditorModule,
   ],
 })
 export class AppModule {}

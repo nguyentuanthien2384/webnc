@@ -1,0 +1,18 @@
+UniShare — gói dữ liệu mẫu cho MongoDB Compass
+
+Gói này có 8 collection (86 bản ghi), 10 tệp PDF và 10 ảnh thu nhỏ. Đây là dữ liệu thử nghiệm của dự án; không chứa người dùng hay nhật ký phát sinh trong database hiện tại.
+
+Cách nhập:
+1. Giải nén tệp ZIP.
+2. Trong MongoDB Compass, kết nối MongoDB rồi tạo một database TRỐNG, ví dụ unishare_demo. Compass yêu cầu tạo collection đầu tiên cùng lúc; đặt tên users.
+3. Mở users → Add Data → Import JSON or CSV file → chọn collections/users.json → Import.
+4. Tạo từng collection còn lại đúng theo tên tệp và nhập JSON tương ứng: subjects, majors, documents, platformstats, logs, reports, editor_drafts. Có thể bật “Stop on errors”.
+5. Sao chép nội dung thư mục uploads/ của gói vào backend/uploads/ của dự án. Kết quả phải có backend/uploads/seed-*.pdf và backend/uploads/thumbnails/*.png.
+6. Nếu dùng tên database ví dụ trên, đặt DATABASE_URL=mongodb://127.0.0.1:27017/unishare_demo trong backend/.env. Sau đó chạy backend và frontend theo README của dự án.
+
+Chỉ nhập các JSON trong collections/. Không nhập manifest.json. Giữ nguyên các trường _id, $oid và $date để quan hệ giữa các collection không bị hỏng. Chỉ nhập vào database hoặc collection trống; nhập lặp vào database có sẵn có thể gặp lỗi trùng _id. Đây là tài khoản thử nghiệm, cần đổi mật khẩu trước khi triển khai thực tế.
+
+Tài khoản Admin: admin@unishare.com / admin123
+Tài khoản sinh viên: huy@st.phenikaa-uni.edu.vn / 123456
+
+Hướng dẫn chính thức của MongoDB Compass: https://www.mongodb.com/docs/compass/import-export/

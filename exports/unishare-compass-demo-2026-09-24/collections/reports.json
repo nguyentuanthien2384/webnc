@@ -1,0 +1,25 @@
+[
+  {
+    "_id": {
+      "$oid": "6ab475789282ae59706bd68a"
+    },
+    "document": {
+      "$oid": "6a7832bf06aef7954aabe7e2"
+    },
+    "reporter": {
+      "$oid": "6a7832bf06aef7954aabe7c3"
+    },
+    "reason": "Báo cáo mẫu để kiểm thử quy trình xử lý tài liệu của quản trị viên.",
+    "status": "OPEN",
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1790211448127"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1790211448127"
+      }
+    }
+  }
+]

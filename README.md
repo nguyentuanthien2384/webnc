@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="frontend/public/logo.png" alt="UniShare Logo" width="80" />
-</p>
+
 
 <h1 align="center">📚 UniShare — Nền tảng Chia sẻ Tài liệu Học tập</h1>
 

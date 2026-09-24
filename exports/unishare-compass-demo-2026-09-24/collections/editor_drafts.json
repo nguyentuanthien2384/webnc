@@ -1,0 +1,46 @@
+[
+  {
+    "_id": {
+      "$oid": "6ab475789282ae59706bd68b"
+    },
+    "owner": {
+      "$oid": "6a7832bf06aef7954aabe7c4"
+    },
+    "sourceDocument": {
+      "$oid": "6a7832bf06aef7954aabe7e1"
+    },
+    "title": "Ghi chú ôn tập Cấu trúc dữ liệu",
+    "content": {
+      "blocks": [
+        {
+          "type": "header",
+          "data": {
+            "text": "Ôn tập Cấu trúc dữ liệu",
+            "level": {
+              "$numberInt": "2"
+            }
+          }
+        },
+        {
+          "type": "paragraph",
+          "data": {
+            "text": "Tóm tắt danh sách liên kết, ngăn xếp và hàng đợi."
+          }
+        }
+      ]
+    },
+    "version": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1790211448127"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1790211448127"
+      }
+    }
+  }
+]

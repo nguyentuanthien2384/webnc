@@ -1,0 +1,16 @@
+{
+  "databaseSuggestion": "unishare_demo",
+  "format": "Canonical Extended JSON",
+  "collections": {
+    "users": 7,
+    "subjects": 18,
+    "majors": 3,
+    "documents": 10,
+    "platformstats": 1,
+    "logs": 45,
+    "reports": 1,
+    "editor_drafts": 1
+  },
+  "pdfs": 10,
+  "thumbnails": 10
+}

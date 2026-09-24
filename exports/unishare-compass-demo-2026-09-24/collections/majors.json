@@ -1,0 +1,155 @@
+[
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7dc"
+    },
+    "name": "Công nghệ thông tin",
+    "code": "CNTT",
+    "description": "Khoa CNTT",
+    "subjects": [
+      {
+        "$oid": "6a7832bf06aef7954aabe7c9"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7ca"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7cb"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7cc"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7cd"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7ce"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7cf"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d0"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d1"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d2"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d3"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d4"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d5"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d6"
+      }
+    ],
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207282"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207282"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7dd"
+    },
+    "name": "Khoa học máy tính",
+    "code": "CS",
+    "description": "Ngành KHMT",
+    "subjects": [
+      {
+        "$oid": "6a7832bf06aef7954aabe7c9"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7ca"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7cb"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7cc"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7cd"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7ce"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7cf"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d0"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d1"
+      }
+    ],
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207283"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207283"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7de"
+    },
+    "name": "Kinh tế",
+    "code": "KT",
+    "description": "Khoa Kinh tế",
+    "subjects": [
+      {
+        "$oid": "6a7832bf06aef7954aabe7d7"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d8"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d2"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d3"
+      },
+      {
+        "$oid": "6a7832bf06aef7954aabe7d4"
+      }
+    ],
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207283"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207283"
+      }
+    }
+  }
+]

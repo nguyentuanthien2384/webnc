@@ -1,0 +1,380 @@
+[
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7c9"
+    },
+    "name": "Nhập môn lập trình",
+    "code": "CSE101",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7ca"
+    },
+    "name": "Cấu trúc dữ liệu và giải thuật",
+    "code": "CSE201",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7cb"
+    },
+    "name": "Cơ sở dữ liệu",
+    "code": "CSE301",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7cc"
+    },
+    "name": "Lập trình hướng đối tượng",
+    "code": "CSE202",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7cd"
+    },
+    "name": "Mạng máy tính",
+    "code": "CSE302",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7ce"
+    },
+    "name": "Phân tích và thiết kế phần mềm",
+    "code": "CSE401",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7cf"
+    },
+    "name": "Công nghệ phần mềm",
+    "code": "CSE402",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d0"
+    },
+    "name": "Trí tuệ nhân tạo",
+    "code": "CSE501",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d1"
+    },
+    "name": "Toán rời rạc",
+    "code": "CSE703024",
+    "managingFaculty": "CNTT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d2"
+    },
+    "name": "Giải tích 1",
+    "code": "MATH101",
+    "managingFaculty": "KHCB",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d3"
+    },
+    "name": "Giải tích 2",
+    "code": "MATH102",
+    "managingFaculty": "KHCB",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d4"
+    },
+    "name": "Đại số tuyến tính",
+    "code": "MATH201",
+    "managingFaculty": "KHCB",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d5"
+    },
+    "name": "Xác suất thống kê",
+    "code": "MATH301",
+    "managingFaculty": "KHCB",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d6"
+    },
+    "name": "Vật lý đại cương",
+    "code": "PHY101",
+    "managingFaculty": "KHCB",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d7"
+    },
+    "name": "Kinh tế vi mô",
+    "code": "ECO101",
+    "managingFaculty": "KTQT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d8"
+    },
+    "name": "Kinh tế vĩ mô",
+    "code": "ECO102",
+    "managingFaculty": "KTQT",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7d9"
+    },
+    "name": "Tiếng Anh 1",
+    "code": "ENG101",
+    "managingFaculty": "NN",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7832bf06aef7954aabe7da"
+    },
+    "name": "Tiếng Anh 2",
+    "code": "ENG102",
+    "managingFaculty": "NN",
+    "__v": {
+      "$numberInt": "0"
+    },
+    "createdAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    },
+    "updatedAt": {
+      "$date": {
+        "$numberLong": "1786262207278"
+      }
+    }
+  }
+]
